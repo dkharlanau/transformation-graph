@@ -49,6 +49,18 @@ A lightweight, project-scoped enterprise transformation model stored in Git.
 - vendor-neutral where practical
 - interoperable with enterprise tools
 
+## Related projects
+
+- [Mapping as Code](https://github.com/dkharlanau/mapping-as-code)
+- [Interface as Code](https://github.com/dkharlanau/interface-as-code)
+- [Reconciliation as Code](https://github.com/dkharlanau/reconciliation-as-code)
+- [Process as Code](https://github.com/dkharlanau/process-as-code)
+- [Enterprise Change Graph](https://github.com/dkharlanau/enterprise-change-graph)
+- [Decision Tables as Code](https://github.com/dkharlanau/decision-tables-as-code)
+- [Data Relationship Map](https://github.com/dkharlanau/data-relationship-map)
+- [Cutover Graph](https://github.com/dkharlanau/cutover-graph)
+- [Project Evidence Graph](https://github.com/dkharlanau/project-evidence-graph)
+
 ## Status
 
 Planning.
