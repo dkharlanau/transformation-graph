@@ -30,6 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files."); import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
     compose = sub.add_parser("compose", help="Compose multiple graph slices deterministically."); compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
     diff = sub.add_parser("diff", help="Compare two graph snapshots and optionally calculate neighboring impact."); diff.add_argument("before"); diff.add_argument("after"); diff.add_argument("--impact-depth", type=int, default=0)
+    mcp = sub.add_parser("mcp", help="Run an MCP v2 server backed by a graph file."); mcp.add_argument("file"); mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio"); mcp.add_argument("--host", default="127.0.0.1"); mcp.add_argument("--port", type=int, default=8000)
     return parser
 
 
@@ -42,6 +43,16 @@ def main(argv: list[str] | None = None) -> int:
             graphs = [Graph.from_file(path) for path in args.files]; graph = Graph.compose(graphs, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, "sources": len(graphs), **graph.stats()}); return 0
         if args.command == "diff":
             before = Graph.from_file(args.before); after = Graph.from_file(args.after); report = diff_with_impact(before, after, args.impact_depth) if args.impact_depth > 0 else graph_diff(before, after); _json(report); return 0
+        if args.command == "mcp":
+            try:
+                from .mcp_server import run_mcp_server
+            except ModuleNotFoundError as exc:
+                if exc.name == "mcp":
+                    print('ERROR: MCP support is optional. Install with: pip install -e ".[mcp]"', file=sys.stderr)
+                    return 1
+                raise
+            run_mcp_server(args.file, transport=args.transport, host=args.host, port=args.port)
+            return 0
 
         graph = Graph.from_file(args.file)
         if args.command == "validate": _json({"valid": True, **graph.stats()}); return 0

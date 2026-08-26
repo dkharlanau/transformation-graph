@@ -34,10 +34,16 @@
 - [ ] Dedicated impact and traceability views
 - [ ] GitHub Pages publishing workflow
 
-## v0.6 — Agent interoperability — in progress
-- [x] Stable JSON context-pack format
-- [x] Machine-readable context-pack schema
+## v0.6 — Agent context — implemented
+- [x] Stable JSON context-pack format and schema
 - [x] Bounded context with provenance
 - [x] Relevant quality findings in agent context
-- [ ] MCP adapter exposing graph/context resources
+
+## v0.7 — MCP adapter — implemented
+- [x] Official MCP Python SDK v2 adapter
+- [x] Project and bounded-context resources
+- [x] Context/path/impact/quality tools
+- [x] stdio transport
+- [x] Streamable HTTP transport
+- [ ] Authentication/deployment profile
 - [ ] Query presets for transformation roles

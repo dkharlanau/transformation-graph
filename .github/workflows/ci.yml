@@ -33,5 +33,7 @@ jobs:
         run: transformation-graph html examples/sap-s4-customer-migration.yaml --output /tmp/transformation-graph.html && test -s /tmp/transformation-graph.html
       - name: Smoke test agent context pack
         run: transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json && test -s /tmp/context-pack.json
+      - name: Smoke test MCP registration
+        run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 4; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
       - name: Run tests
         run: pytest -q
