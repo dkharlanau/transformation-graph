@@ -12,25 +12,26 @@
 - [x] Impact traversal by relation and direction
 - [x] Machine-readable quality report
 - [x] Mermaid export
-- [ ] Configurable policy packs
+- [x] Configurable policy packs
 
-## v0.3 — Import and composition — in progress
+## v0.3 — Import and composition — implemented
 - [x] CSV importer
-- [ ] Excel importer
+- [x] Excel importer
 - [x] Compose multiple graph files
-- [ ] Mapping as Code adapter
-- [ ] Interface as Code adapter
-- [ ] Process as Code adapter
+- [x] Mapping as Code adapter
+- [x] Interface as Code adapter
+- [x] Process as Code adapter
 
 ## v0.4 — Change intelligence — implemented
 - [x] Semantic graph diff between snapshots
 - [x] Changed roots and neighboring impact
-- [ ] GitHub PR summary/annotation
+- [x] Markdown/JSON GitHub PR review summary
+- [ ] Optional PR comment/check annotation action
 
 ## v0.5 — Generated views — in progress
 - [x] Dependency-free static HTML explorer
 - [x] Search, type filter, node detail, direct relations
-- [ ] Full visual graph canvas
+- [x] Interactive SVG dependency graph canvas
 - [ ] Dedicated impact and traceability views
 - [ ] GitHub Pages publishing workflow
 
@@ -47,3 +48,22 @@
 - [x] Streamable HTTP transport
 - [ ] Authentication/deployment profile
 - [ ] Query presets for transformation roles
+
+## v0.8 — Enterprise ingestion — implemented
+- [x] Excel workbook contract compatible with CSV inventories
+- [x] Field-level mapping normalization
+- [x] Interface operational-context normalization
+- [x] Process step/transition/control/evidence normalization
+
+## v0.9 — Governance and review — implemented
+- [x] Generic policy-pack engine
+- [x] Error/warning CI thresholds
+- [x] Change-review report with impact and quality/policy deltas
+- [x] Self-dogfooded pull-request summary workflow
+
+## Next
+- [ ] Adapter contract versioning and conformance fixtures across sibling repositories
+- [ ] Traceability matrix export
+- [ ] Role-oriented query presets: architect, data lead, integration lead, test lead, cutover lead
+- [ ] Published package/release workflow
+- [ ] GitHub Pages project explorer
