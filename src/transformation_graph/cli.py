@@ -4,10 +4,11 @@ import argparse
 import json
 import sys
 
+from .adapters import graph_from_as_code
 from .agent_context import build_context_pack, write_context_pack
 from .diffing import diff_with_impact, graph_diff
 from .html_export import write_html
-from .importers import graph_from_csv, write_graph
+from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
 
 
@@ -16,21 +17,43 @@ def _json(value: object) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="transformation-graph", description="Validate, compose, compare, visualize, and query Git-native enterprise transformation graphs.")
+    parser = argparse.ArgumentParser(
+        prog="transformation-graph",
+        description="Validate, compose, compare, visualize, import, and query Git-native enterprise transformation graphs.",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
-    validate = sub.add_parser("validate", help="Validate a YAML or JSON graph."); validate.add_argument("file")
-    stats = sub.add_parser("stats", help="Show graph statistics."); stats.add_argument("file")
-    path = sub.add_parser("path", help="Find the shortest dependency path."); path.add_argument("file"); path.add_argument("source"); path.add_argument("target"); path.add_argument("--undirected", action="store_true")
-    context = sub.add_parser("context", help="Emit bounded context around a node."); context.add_argument("file"); context.add_argument("node"); context.add_argument("--depth", type=int, default=1)
-    context_pack = sub.add_parser("context-pack", help="Emit a stable agent-ready bounded context packet."); context_pack.add_argument("file"); context_pack.add_argument("node"); context_pack.add_argument("--depth", type=int, default=1); context_pack.add_argument("--output")
-    impact = sub.add_parser("impact", help="Traverse impacted nodes around a root."); impact.add_argument("file"); impact.add_argument("node"); impact.add_argument("--depth", type=int, default=2); impact.add_argument("--direction", choices=["in", "out", "both"], default="both"); impact.add_argument("--relation", action="append", dest="relations")
-    quality = sub.add_parser("quality", help="Run opinionated graph quality checks."); quality.add_argument("file"); quality.add_argument("--strict", action="store_true")
-    mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
-    html = sub.add_parser("html", help="Generate a dependency-free single-file HTML explorer."); html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
-    import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files."); import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
-    compose = sub.add_parser("compose", help="Compose multiple graph slices deterministically."); compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
-    diff = sub.add_parser("diff", help="Compare two graph snapshots and optionally calculate neighboring impact."); diff.add_argument("before"); diff.add_argument("after"); diff.add_argument("--impact-depth", type=int, default=0)
-    mcp = sub.add_parser("mcp", help="Run an MCP v2 server backed by a graph file."); mcp.add_argument("file"); mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio"); mcp.add_argument("--host", default="127.0.0.1"); mcp.add_argument("--port", type=int, default=8000)
+
+    validate = sub.add_parser("validate", help="Validate a YAML or JSON graph.")
+    validate.add_argument("file")
+    stats = sub.add_parser("stats", help="Show graph statistics.")
+    stats.add_argument("file")
+    path = sub.add_parser("path", help="Find the shortest dependency path.")
+    path.add_argument("file"); path.add_argument("source"); path.add_argument("target"); path.add_argument("--undirected", action="store_true")
+    context = sub.add_parser("context", help="Emit bounded context around a node.")
+    context.add_argument("file"); context.add_argument("node"); context.add_argument("--depth", type=int, default=1)
+    context_pack = sub.add_parser("context-pack", help="Emit a stable agent-ready bounded context packet.")
+    context_pack.add_argument("file"); context_pack.add_argument("node"); context_pack.add_argument("--depth", type=int, default=1); context_pack.add_argument("--output")
+    impact = sub.add_parser("impact", help="Traverse impacted nodes around a root.")
+    impact.add_argument("file"); impact.add_argument("node"); impact.add_argument("--depth", type=int, default=2); impact.add_argument("--direction", choices=["in", "out", "both"], default="both"); impact.add_argument("--relation", action="append", dest="relations")
+    quality = sub.add_parser("quality", help="Run opinionated graph quality checks.")
+    quality.add_argument("file"); quality.add_argument("--strict", action="store_true")
+    mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid.")
+    mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
+    html = sub.add_parser("html", help="Generate a dependency-free single-file HTML explorer.")
+    html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
+
+    import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files.")
+    import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
+    import_excel = sub.add_parser("import-excel", help="Build a graph from an Excel workbook with Nodes and Edges sheets.")
+    import_excel.add_argument("workbook"); import_excel.add_argument("--nodes-sheet", default="Nodes"); import_excel.add_argument("--edges-sheet", default="Edges"); import_excel.add_argument("--project-id", required=True); import_excel.add_argument("--project-name", required=True); import_excel.add_argument("--description"); import_excel.add_argument("--output", required=True)
+    import_adapter = sub.add_parser("import-adapter", help="Normalize a Mapping/Interface/Process-as-Code document into the canonical graph.")
+    import_adapter.add_argument("kind", choices=["mapping", "interface", "process"]); import_adapter.add_argument("input"); import_adapter.add_argument("--project-id"); import_adapter.add_argument("--project-name"); import_adapter.add_argument("--output", required=True)
+    compose = sub.add_parser("compose", help="Compose multiple graph slices deterministically.")
+    compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
+    diff = sub.add_parser("diff", help="Compare two graph snapshots and optionally calculate neighboring impact.")
+    diff.add_argument("before"); diff.add_argument("after"); diff.add_argument("--impact-depth", type=int, default=0)
+    mcp = sub.add_parser("mcp", help="Run an MCP v2 server backed by a graph file.")
+    mcp.add_argument("file"); mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio"); mcp.add_argument("--host", default="127.0.0.1"); mcp.add_argument("--port", type=int, default=8000)
     return parser
 
 
@@ -38,21 +61,30 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "import-csv":
-            graph = graph_from_csv(args.nodes, args.edges, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
+            graph = graph_from_csv(args.nodes, args.edges, args.project_id, args.project_name, args.description)
+            write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
+        if args.command == "import-excel":
+            graph = graph_from_excel(args.workbook, args.project_id, args.project_name, args.description, nodes_sheet=args.nodes_sheet, edges_sheet=args.edges_sheet)
+            write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
+        if args.command == "import-adapter":
+            graph = graph_from_as_code(args.input, args.kind, args.project_id, args.project_name)
+            write_graph(graph, args.output); _json({"written": args.output, "adapter": args.kind, **graph.stats()}); return 0
         if args.command == "compose":
-            graphs = [Graph.from_file(path) for path in args.files]; graph = Graph.compose(graphs, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, "sources": len(graphs), **graph.stats()}); return 0
+            graphs = [Graph.from_file(path) for path in args.files]
+            graph = Graph.compose(graphs, args.project_id, args.project_name, args.description)
+            write_graph(graph, args.output); _json({"written": args.output, "sources": len(graphs), **graph.stats()}); return 0
         if args.command == "diff":
-            before = Graph.from_file(args.before); after = Graph.from_file(args.after); report = diff_with_impact(before, after, args.impact_depth) if args.impact_depth > 0 else graph_diff(before, after); _json(report); return 0
+            before = Graph.from_file(args.before); after = Graph.from_file(args.after)
+            report = diff_with_impact(before, after, args.impact_depth) if args.impact_depth > 0 else graph_diff(before, after)
+            _json(report); return 0
         if args.command == "mcp":
             try:
                 from .mcp_server import run_mcp_server
             except ModuleNotFoundError as exc:
                 if exc.name == "mcp":
-                    print('ERROR: MCP support is optional. Install with: pip install -e ".[mcp]"', file=sys.stderr)
-                    return 1
+                    print('ERROR: MCP support is optional. Install with: pip install -e ".[mcp]"', file=sys.stderr); return 1
                 raise
-            run_mcp_server(args.file, transport=args.transport, host=args.host, port=args.port)
-            return 0
+            run_mcp_server(args.file, transport=args.transport, host=args.host, port=args.port); return 0
 
         graph = Graph.from_file(args.file)
         if args.command == "validate": _json({"valid": True, **graph.stats()}); return 0

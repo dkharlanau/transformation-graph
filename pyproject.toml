@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transformation-graph"
-version = "0.7.0"
+version = "0.8.0"
 description = "Git-native enterprise transformation graphs for processes, systems, data, interfaces, mappings, tests, decisions, and changes."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,8 +13,9 @@ authors = [{name = "Dzmitryi Kharlanau"}]
 dependencies = ["PyYAML>=6.0"]
 
 [project.optional-dependencies]
+excel = ["openpyxl>=3.1"]
 mcp = ["mcp>=2,<3"]
-dev = ["pytest>=8.0", "mcp>=2,<3"]
+dev = ["pytest>=8.0", "mcp>=2,<3", "openpyxl>=3.1"]
 
 [project.scripts]
 transformation-graph = "transformation_graph.cli:main"
