@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "product": "transformation-graph",
+  "purpose": "Compose enterprise transformation artifacts into a deterministic dependency graph for traceability, impact, governance, and bounded agent context.",
+  "human_url": "https://dkharlanau.github.io/transformation-graph/",
+  "repository": "https://github.com/dkharlanau/transformation-graph",
+  "boundaries": ["not a replacement for source contracts", "do not invent graph edges", "adapter conformance must pass before cross-repository composition", "use bounded traversal for agent context"],
+  "capabilities": ["build governed project graphs", "validate canonical graph", "trace paths", "bounded impact traversal", "role and governance views", "governance scorecards", "semantic graph diff", "static explorer publishing", "GraphML export", "context packs and MCP"],
+  "entrypoints": [
+    {"type":"cli","command":"transformation-graph build-project <project.yaml> --output-dir build"},
+    {"type":"cli","command":"transformation-graph impact <graph.yaml> <node-id> --depth 2"},
+    {"type":"cli","command":"transformation-graph trace <graph.yaml> --from-type mapping --to-type field --format markdown"},
+    {"type":"cli","command":"transformation-graph context-pack <graph.yaml> <node-id> --depth 1"},
+    {"type":"cli","command":"transformation-graph mcp <graph.yaml>"}
+  ],
+  "safe_agent_loop": ["read project manifest and adapter contract", "build/validate graph", "identify exact node IDs", "use bounded path/impact/context queries", "return paths and governance findings", "never infer absent relationships"],
+  "related": [
+    {"product":"mapping-as-code","relationship":"mapping source adapter"},
+    {"product":"interface-as-code","relationship":"interface source adapter"},
+    {"product":"process-as-code","relationship":"process source adapter"},
+    {"product":"enterprise-change-graph","relationship":"broader enterprise change impact"}
+  ]
+}
