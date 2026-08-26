@@ -57,8 +57,11 @@ def test_mapping_as_code_adapter_builds_field_level_traceability(tmp_path: Path)
 
     assert "mapping.customer-core" in graph.nodes
     assert graph.stats()["node_types"]["rule"] == 2
-    assert graph.path("mapping.customer-core", "field.SAP-S4.Customer.KUNNR") == [
+    assert graph.path("mapping.customer-core", "rule.customer-core.1") == [
         "mapping.customer-core",
+        "rule.customer-core.1",
+    ]
+    assert graph.path("rule.customer-core.1", "field.SAP-S4.Customer.KUNNR") == [
         "rule.customer-core.1",
         "field.SAP-S4.Customer.KUNNR",
     ]
