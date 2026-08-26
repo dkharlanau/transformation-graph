@@ -10,13 +10,12 @@ Transformation Graph links processes, systems, business objects, data, fields, i
 - deterministic semantic validation
 - realistic SAP S/4HANA customer migration example
 - dependency paths and bounded machine context
-- impact traversal with direction/relation filters
-- quality checks for orphan/coverage/evidence/ownership gaps
-- Mermaid export for full or focused graph views
+- impact traversal and project-quality checks
+- Mermaid export
+- dependency-free single-file HTML explorer
 - generic CSV node/edge import
-- deterministic composition of graph slices
-- semantic graph diff between snapshots
-- change-root and neighboring-impact analysis
+- deterministic graph composition
+- semantic graph diff and neighboring change-impact
 - pytest suite and GitHub Actions quality gate
 
 No SAP system access is required.
@@ -33,23 +32,23 @@ transformation-graph quality examples/sap-s4-customer-migration.yaml
 transformation-graph impact examples/sap-s4-customer-migration.yaml change.bp-model --depth 2
 ```
 
-Compare transformation snapshots and expand review impact:
+Generate an offline explorer:
+
+```bash
+transformation-graph html examples/sap-s4-customer-migration.yaml --output transformation-graph.html
+```
+
+Compare snapshots:
 
 ```bash
 transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
 ```
 
-Import an existing tabular inventory and compose slices:
+Import and compose existing inventories:
 
 ```bash
 transformation-graph import-csv --nodes nodes.csv --edges edges.csv --project-id demo --project-name "Demo" --output demo.yaml
 transformation-graph compose process.yaml data.yaml interfaces.yaml --project-id program --project-name "Program Graph" --output program.yaml
-```
-
-Generate a focused Mermaid diagram:
-
-```bash
-transformation-graph mermaid examples/sap-s4-customer-migration.yaml --focus mapping.customer-to-bp --depth 1
 ```
 
 ## Why this exists
@@ -75,7 +74,7 @@ graph LR
   M --> E[Evidence]
 ```
 
-Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [import/composition](docs/importing.md) · [change intelligence](docs/change-intelligence.md).
+Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [import/composition](docs/importing.md) · [change intelligence](docs/change-intelligence.md) · [HTML explorer](docs/html-explorer.md).
 
 ## Agent-ready by design
 
@@ -95,4 +94,4 @@ The useful AI pattern is not to send the whole project to a model. Resolve the n
 
 ## Status
 
-**Executable MVP / v0.4.** The repository now supports authoring, validation, query, composition, visualization, quality analysis, and semantic change review.
+**Executable MVP / v0.5.** The repository now supports authoring, validation, query, import, composition, visualization, quality analysis, and semantic change review.

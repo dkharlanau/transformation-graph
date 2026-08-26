@@ -29,5 +29,7 @@ jobs:
         run: transformation-graph validate /tmp/csv-ci.yaml
       - name: Smoke test graph diff
         run: transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
+      - name: Smoke test HTML explorer
+        run: transformation-graph html examples/sap-s4-customer-migration.yaml --output /tmp/transformation-graph.html && test -s /tmp/transformation-graph.html
       - name: Run tests
         run: pytest -q
