@@ -3,21 +3,48 @@ project:
   id: customer-domain-reference
   name: Customer Domain Reference Transformation
   description: >
-    Reference project assembled from process, interface, and mapping as-code artifacts.
+    Multi-domain reference transformation assembled from process, interface,
+    mapping, reconciliation, change, evidence, and cutover sources.
 sources:
   adapters:
     - {kind: mapping, path: ../adapters/mapping.yaml}
     - {kind: interface, path: ../adapters/interface.yaml}
     - {kind: process, path: ../adapters/process.yaml}
-  graphs: []
+  graphs:
+    - domains/reconciliation.yaml
+    - domains/change.yaml
+    - domains/evidence.yaml
+    - domains/cutover.yaml
+links:
+  - {from: interface.customer_replication, to: interface.CUSTOMER-MDG-S4-01, type: same_as, label: canonical interface specification}
+  - {from: system.mdg, to: system.SAP-MDG, type: same_as}
+  - {from: system.s4, to: system.SAP-S4, type: same_as}
+  - {from: business_object.business_partner, to: data_object.SAP-MDG.BusinessPartner, type: represented_by}
+
+  - {from: requirement.customer-reconciliation, to: interface.CUSTOMER-MDG-S4-01, type: constrains}
+  - {from: test.customer-reconciliation, to: interface.CUSTOMER-MDG-S4-01, type: validates}
+  - {from: test.customer-reconciliation, to: mapping.customer-core, type: validates}
+
+  - {from: change.customer-cutover, to: process.customer_creation, type: affects}
+  - {from: change.customer-cutover, to: interface.CUSTOMER-MDG-S4-01, type: affects}
+  - {from: change.customer-cutover, to: mapping.customer-core, type: affects}
+
+  - {from: mapping.customer-core, to: evidence.mapping-approval, type: evidenced_by}
+  - {from: test.CUSTOMER-MDG-S4-01.happy-path, to: evidence.interface-test-log, type: evidenced_by}
+  - {from: decision.external-numbering, to: evidence.cutover-signoff, type: evidenced_by}
+  - {from: test.cutover-dry-run, to: evidence.cutover-signoff, type: evidenced_by}
+
+  - {from: process.cutover-execution, to: owner.cutover-lead, type: owned_by}
+  - {from: process.cutover-execution, to: system.SAP-S4, type: runs_on}
+  - {from: process_step.cutover.load, to: interface.CUSTOMER-MDG-S4-01, type: uses_interface}
+  - {from: process_step.cutover.verify, to: test.customer-reconciliation, type: validated_by}
+  - {from: process_step.cutover.verify, to: evidence.cutover-signoff, type: evidenced_by}
 governance:
   conformance_fail_on: error
   policies:
     - ../../policies/enterprise-baseline.yaml
   policy_fail_on: error
-  # The reference intentionally retains visible coverage gaps; 60 is its CI floor,
-  # not a claim that 60 is a universal enterprise readiness target.
-  score_fail_below: 60
+  score_fail_below: 85
 publish:
   site: true
   title: Customer Domain Transformation Graph

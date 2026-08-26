@@ -1,0 +1,21 @@
+version: "0.1"
+project:
+  id: customer-reconciliation
+  name: Customer Replication Reconciliation
+  description: Daily business-key reconciliation between governed source and target customer state.
+nodes:
+  - id: requirement.customer-reconciliation
+    type: requirement
+    title: Replicated customers must reconcile by business key
+  - id: test.customer-reconciliation
+    type: test
+    title: Daily customer replication reconciliation
+    attributes: {frequency: daily, comparison: source-vs-target-business-key}
+  - id: evidence.reconciliation-report
+    type: evidence
+    title: Daily reconciliation result
+    attributes: {retention: audit}
+edges:
+  - {from: requirement.customer-reconciliation, to: test.customer-reconciliation, type: covered_by}
+  - {from: test.customer-reconciliation, to: requirement.customer-reconciliation, type: validates}
+  - {from: test.customer-reconciliation, to: evidence.reconciliation-report, type: produces}

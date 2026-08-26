@@ -1,0 +1,18 @@
+version: "0.1"
+project:
+  id: customer-transformation-evidence
+  name: Customer Transformation Evidence
+nodes:
+  - id: evidence.mapping-approval
+    type: evidence
+    title: Approved customer field mapping
+    attributes: {kind: mapping-approval}
+  - id: evidence.interface-test-log
+    type: evidence
+    title: Customer interface acceptance-test log
+    attributes: {kind: test-log}
+  - id: evidence.cutover-signoff
+    type: evidence
+    title: Customer cutover sign-off
+    attributes: {kind: sign-off}
+edges: []

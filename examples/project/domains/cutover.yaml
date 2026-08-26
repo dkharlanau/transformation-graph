@@ -1,0 +1,23 @@
+version: "0.1"
+project:
+  id: customer-cutover-process
+  name: Customer Cutover Execution
+nodes:
+  - id: process.cutover-execution
+    type: process
+    title: Execute customer cutover
+  - id: process_step.cutover.freeze
+    type: process_step
+    title: Freeze customer replication changes
+  - id: process_step.cutover.load
+    type: process_step
+    title: Execute final customer replication
+  - id: process_step.cutover.verify
+    type: process_step
+    title: Verify target reconciliation and sign-off
+edges:
+  - {from: process.cutover-execution, to: process_step.cutover.freeze, type: contains}
+  - {from: process.cutover-execution, to: process_step.cutover.load, type: contains}
+  - {from: process.cutover-execution, to: process_step.cutover.verify, type: contains}
+  - {from: process_step.cutover.freeze, to: process_step.cutover.load, type: precedes}
+  - {from: process_step.cutover.load, to: process_step.cutover.verify, type: precedes}

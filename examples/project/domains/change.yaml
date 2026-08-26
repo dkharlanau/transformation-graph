@@ -1,0 +1,22 @@
+version: "0.1"
+project:
+  id: customer-cutover-change
+  name: Customer Cutover Change
+nodes:
+  - id: change.customer-cutover
+    type: change
+    title: Cut over governed customer replication to S/4HANA
+  - id: decision.external-numbering
+    type: decision
+    title: Preserve source customer numbers during cutover
+  - id: owner.cutover-lead
+    type: owner
+    title: Customer Cutover Lead
+  - id: test.cutover-dry-run
+    type: test
+    title: Customer cutover dry run
+edges:
+  - {from: change.customer-cutover, to: decision.external-numbering, type: governed_by}
+  - {from: decision.external-numbering, to: owner.cutover-lead, type: owned_by}
+  - {from: change.customer-cutover, to: test.cutover-dry-run, type: covered_by}
+  - {from: test.cutover-dry-run, to: change.customer-cutover, type: validates}
