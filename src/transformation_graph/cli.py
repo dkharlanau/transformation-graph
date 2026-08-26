@@ -6,6 +6,13 @@ import sys
 
 from .adapters import graph_from_as_code
 from .agent_context import build_context_pack, write_context_pack
+from .composition import compose_adapter_documents
+from .conformance import (
+    evaluate_adapter_graph,
+    render_conformance_report,
+    should_fail_conformance,
+    write_conformance_report,
+)
 from .diffing import diff_with_impact, graph_diff
 from .html_export import write_html
 from .importers import graph_from_csv, graph_from_excel, write_graph
@@ -48,7 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
     import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files."); import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
     import_excel = sub.add_parser("import-excel", help="Build a graph from an Excel workbook with Nodes and Edges sheets."); import_excel.add_argument("workbook"); import_excel.add_argument("--nodes-sheet", default="Nodes"); import_excel.add_argument("--edges-sheet", default="Edges"); import_excel.add_argument("--project-id", required=True); import_excel.add_argument("--project-name", required=True); import_excel.add_argument("--description"); import_excel.add_argument("--output", required=True)
     import_adapter = sub.add_parser("import-adapter", help="Normalize a Mapping/Interface/Process-as-Code document into the canonical graph."); import_adapter.add_argument("kind", choices=["mapping", "interface", "process"]); import_adapter.add_argument("input"); import_adapter.add_argument("--project-id"); import_adapter.add_argument("--project-name"); import_adapter.add_argument("--output", required=True)
-    compose = sub.add_parser("compose", help="Compose multiple graph slices deterministically."); compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
+    adapter_check = sub.add_parser("adapter-check", help="Normalize and semantically conformance-check an as-code document."); adapter_check.add_argument("kind", choices=["mapping", "interface", "process"]); adapter_check.add_argument("input"); adapter_check.add_argument("--format", choices=["json", "markdown"], default="json"); adapter_check.add_argument("--output"); adapter_check.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
+    compose_adapters = sub.add_parser("compose-adapters", help="Normalize, conformance-check, and reconcile multiple as-code documents."); compose_adapters.add_argument("--mapping", action="append", default=[]); compose_adapters.add_argument("--interface", action="append", default=[]); compose_adapters.add_argument("--process", action="append", default=[]); compose_adapters.add_argument("--project-id", required=True); compose_adapters.add_argument("--project-name", required=True); compose_adapters.add_argument("--description"); compose_adapters.add_argument("--fail-on", choices=["error", "warning", "never"], default="error"); compose_adapters.add_argument("--output", required=True)
+    compose = sub.add_parser("compose", help="Compose multiple canonical graph slices strictly."); compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
     diff = sub.add_parser("diff", help="Compare two graph snapshots and optionally calculate neighboring impact."); diff.add_argument("before"); diff.add_argument("after"); diff.add_argument("--impact-depth", type=int, default=0)
     review = sub.add_parser("review", help="Generate a Markdown or JSON change-review report for CI/PR use."); review.add_argument("before"); review.add_argument("after"); review.add_argument("--impact-depth", type=int, default=1); review.add_argument("--policy", action="append", dest="policies"); review.add_argument("--format", choices=["markdown", "json"], default="markdown"); review.add_argument("--output", required=True)
     mcp = sub.add_parser("mcp", help="Run an MCP v2 server backed by a graph file."); mcp.add_argument("file"); mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio"); mcp.add_argument("--host", default="127.0.0.1"); mcp.add_argument("--port", type=int, default=8000)
@@ -63,6 +72,14 @@ def _emit_trace_report(report: dict, format: str, output: str | None) -> None:
         print(render_traceability_report(report, format), end="")  # type: ignore[arg-type]
 
 
+def _emit_conformance(report: dict, format: str, output: str | None) -> None:
+    if output:
+        write_conformance_report(report, output, format)  # type: ignore[arg-type]
+        _json({"written": output, "format": format, **report["summary"]})
+    else:
+        print(render_conformance_report(report, format), end="")  # type: ignore[arg-type]
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
@@ -74,6 +91,11 @@ def main(argv: list[str] | None = None) -> int:
             graph = graph_from_excel(args.workbook, args.project_id, args.project_name, args.description, nodes_sheet=args.nodes_sheet, edges_sheet=args.edges_sheet); write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "import-adapter":
             graph = graph_from_as_code(args.input, args.kind, args.project_id, args.project_name); write_graph(graph, args.output); _json({"written": args.output, "adapter": args.kind, **graph.stats()}); return 0
+        if args.command == "adapter-check":
+            graph = graph_from_as_code(args.input, args.kind); report = evaluate_adapter_graph(graph, args.kind); _emit_conformance(report, args.format, args.output); return 5 if should_fail_conformance(report, args.fail_on) else 0
+        if args.command == "compose-adapters":
+            specs = [("mapping", item) for item in args.mapping] + [("interface", item) for item in args.interface] + [("process", item) for item in args.process]
+            graph, checks = compose_adapter_documents(specs, args.project_id, args.project_name, args.description, fail_on=args.fail_on); write_graph(graph, args.output); _json({"written": args.output, "sources": len(specs), "conformance": [check["summary"] for check in checks], **graph.stats()}); return 0
         if args.command == "compose":
             graphs = [Graph.from_file(path) for path in args.files]; graph = Graph.compose(graphs, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, "sources": len(graphs), **graph.stats()}); return 0
         if args.command == "diff":

@@ -35,6 +35,15 @@ jobs:
         run: transformation-graph import-csv --nodes examples/csv/nodes.csv --edges examples/csv/edges.csv --project-id csv-ci --project-name "CSV CI" --output /tmp/csv-ci.yaml
       - name: Validate imported graph
         run: transformation-graph validate /tmp/csv-ci.yaml
+      - name: Smoke test adapter conformance
+        run: |
+          transformation-graph adapter-check mapping examples/adapters/mapping.yaml --fail-on error
+          transformation-graph adapter-check interface examples/adapters/interface.yaml --fail-on error
+          transformation-graph adapter-check process examples/adapters/process.yaml --fail-on error
+      - name: Smoke test reconciled adapter composition
+        run: |
+          transformation-graph compose-adapters --mapping examples/adapters/mapping.yaml --interface examples/adapters/interface.yaml --process examples/adapters/process.yaml --project-id adapter-program --project-name "Adapter Program" --output /tmp/adapter-program.yaml
+          transformation-graph validate /tmp/adapter-program.yaml
       - name: Smoke test as-code adapters
         run: |
           transformation-graph import-adapter mapping examples/adapters/mapping.yaml --output /tmp/mapping.yaml
