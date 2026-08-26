@@ -7,14 +7,16 @@ Transformation Graph links processes, systems, business objects, data, fields, i
 ## What is executable today
 
 - canonical YAML/JSON graph model and JSON Schema
-- semantic validation with dangling-reference and duplicate detection
+- deterministic semantic validation
 - realistic SAP S/4HANA customer migration example
-- shortest dependency-path and bounded context queries
+- dependency paths and bounded machine context
 - impact traversal with direction/relation filters
 - quality checks for orphan/coverage/evidence/ownership gaps
 - Mermaid export for full or focused graph views
 - generic CSV node/edge import
-- deterministic composition of multiple graph slices
+- deterministic composition of graph slices
+- semantic graph diff between snapshots
+- change-root and neighboring-impact analysis
 - pytest suite and GitHub Actions quality gate
 
 No SAP system access is required.
@@ -25,9 +27,16 @@ No SAP system access is required.
 git clone https://github.com/dkharlanau/transformation-graph.git
 cd transformation-graph
 python -m pip install -e ".[dev]"
+
 transformation-graph validate examples/sap-s4-customer-migration.yaml
 transformation-graph quality examples/sap-s4-customer-migration.yaml
 transformation-graph impact examples/sap-s4-customer-migration.yaml change.bp-model --depth 2
+```
+
+Compare transformation snapshots and expand review impact:
+
+```bash
+transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
 ```
 
 Import an existing tabular inventory and compose slices:
@@ -66,7 +75,7 @@ graph LR
   M --> E[Evidence]
 ```
 
-See [docs/model.md](docs/model.md), [docs/queries.md](docs/queries.md), [docs/quality.md](docs/quality.md), and [docs/importing.md](docs/importing.md).
+Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [import/composition](docs/importing.md) · [change intelligence](docs/change-intelligence.md).
 
 ## Agent-ready by design
 
@@ -86,4 +95,4 @@ The useful AI pattern is not to send the whole project to a model. Resolve the n
 
 ## Status
 
-**MVP / v0.3.** The repository is executable and evolving through real transformation use cases.
+**Executable MVP / v0.4.** The repository now supports authoring, validation, query, composition, visualization, quality analysis, and semantic change review.

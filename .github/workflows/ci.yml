@@ -27,5 +27,7 @@ jobs:
         run: transformation-graph import-csv --nodes examples/csv/nodes.csv --edges examples/csv/edges.csv --project-id csv-ci --project-name "CSV CI" --output /tmp/csv-ci.yaml
       - name: Validate imported graph
         run: transformation-graph validate /tmp/csv-ci.yaml
+      - name: Smoke test graph diff
+        run: transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
       - name: Run tests
         run: pytest -q

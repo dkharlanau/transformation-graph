@@ -1,0 +1,11 @@
+version: "0.1"
+project:
+  id: interface-change-before
+  name: Interface Change Before
+nodes:
+  - {id: system.erp, type: system, title: Legacy ERP}
+  - {id: interface.customer, type: interface, title: Customer outbound}
+  - {id: test.customer, type: test, title: Customer interface smoke test}
+edges:
+  - {from: system.erp, to: interface.customer, type: sends_via}
+  - {from: test.customer, to: interface.customer, type: validates}

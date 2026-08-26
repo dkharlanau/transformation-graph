@@ -2,13 +2,13 @@ name: Transformation Graph
 repository: transformation-graph
 owner: dkharlanau
 visibility: public
-status: mvp-v0.3
+status: mvp-v0.4
 implementation:
   repository_created: true
   implementation_status: executable-mvp
   model_version: "0.1"
-  feature_version: "0.3"
-  package_version: "0.3.0"
+  feature_version: "0.4"
+  package_version: "0.4.0"
   codex_fit: 5/5
   sap_access_required: false
   ci: true
@@ -24,6 +24,8 @@ capabilities:
   - mermaid-export
   - csv-import
   - graph-composition
+  - graph-diff
+  - change-impact
   - json-schema
 principles:
   - versionable

@@ -1,0 +1,13 @@
+version: "0.1"
+project:
+  id: interface-change-after
+  name: Interface Change After
+nodes:
+  - {id: system.erp, type: system, title: Legacy ERP}
+  - {id: interface.customer, type: interface, title: Customer outbound v2}
+  - {id: test.customer, type: test, title: Customer interface smoke test}
+  - {id: system.s4, type: system, title: SAP S/4HANA}
+edges:
+  - {from: system.erp, to: interface.customer, type: sends_via}
+  - {from: test.customer, to: interface.customer, type: validates}
+  - {from: interface.customer, to: system.s4, type: sends_to}
