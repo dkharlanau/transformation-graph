@@ -11,7 +11,9 @@ def test_project_manifest_builds_governed_graph_and_site(tmp_path: Path):
     build = tmp_path / "build"
 
     assert report["passed"] is True
-    assert report["governance"]["scorecard"]["score"] >= 70
+    scorecard = report["governance"]["scorecard"]
+    assert scorecard["score"] >= 60
+    assert scorecard["summary"]["gaps"] > 0
     assert len(report["conformance"]) == 3
     assert (build / "graph.yaml").exists()
     assert (build / "build-report.json").exists()

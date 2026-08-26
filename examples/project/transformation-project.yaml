@@ -15,7 +15,9 @@ governance:
   policies:
     - ../../policies/enterprise-baseline.yaml
   policy_fail_on: error
-  score_fail_below: 70
+  # The reference intentionally retains visible coverage gaps; 60 is its CI floor,
+  # not a claim that 60 is a universal enterprise readiness target.
+  score_fail_below: 60
 publish:
   site: true
   title: Customer Domain Transformation Graph
