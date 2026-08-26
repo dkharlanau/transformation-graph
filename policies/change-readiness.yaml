@@ -1,0 +1,37 @@
+version: "0.1"
+policy:
+  id: change-readiness
+  name: Change readiness
+  rules:
+    - id: change-test-required
+      kind: require_relation
+      node_type: change
+      direction: out
+      relations: [covered_by, validated_by]
+      target_type: test
+      severity: error
+      message: Every change must link to at least one validating test.
+    - id: change-owner
+      kind: require_relation
+      node_type: change
+      direction: out
+      relations: [owned_by, governed_by]
+      target_type: [owner, decision]
+      severity: warning
+      message: Every change should have explicit governance or ownership.
+    - id: interface-test
+      kind: require_relation
+      node_type: interface
+      direction: in
+      relations: [validates]
+      target_type: test
+      severity: warning
+      message: Interfaces should be covered by at least one test.
+    - id: mapping-evidence
+      kind: require_relation
+      node_type: mapping
+      direction: out
+      relations: [evidenced_by]
+      target_type: evidence
+      severity: warning
+      message: Mappings should link to approved evidence.

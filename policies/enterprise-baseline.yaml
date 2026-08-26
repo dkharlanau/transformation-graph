@@ -1,0 +1,34 @@
+version: "0.1"
+policy:
+  id: enterprise-baseline
+  name: Enterprise transformation baseline
+  rules:
+    - id: no-orphans
+      kind: forbid_orphan
+      node_type: "*"
+      severity: error
+      message: Every graph node must participate in at least one relationship.
+    - id: mapping-evidence
+      kind: require_relation
+      node_type: mapping
+      direction: out
+      relations: [evidenced_by]
+      target_type: evidence
+      severity: warning
+      message: Mappings should link to approved evidence.
+    - id: decision-owner
+      kind: require_relation
+      node_type: decision
+      direction: out
+      relations: [owned_by]
+      target_type: owner
+      severity: warning
+      message: Decisions should have an explicit owner.
+    - id: change-test
+      kind: require_relation
+      node_type: change
+      direction: out
+      relations: [covered_by, validated_by]
+      target_type: test
+      severity: warning
+      message: Changes should be linked to validating test coverage.
