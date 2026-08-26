@@ -24,22 +24,20 @@
 
 ## v0.4 — Change intelligence — implemented
 - [x] Semantic graph diff between snapshots
-- [x] Added/removed/changed nodes and edges
-- [x] Changed roots
-- [x] Neighboring impact expansion
+- [x] Changed roots and neighboring impact
 - [ ] GitHub PR summary/annotation
 
 ## v0.5 — Generated views — in progress
 - [x] Dependency-free static HTML explorer
-- [x] Node search and type filtering
-- [x] Node detail and direct relationship views
+- [x] Search, type filter, node detail, direct relations
 - [ ] Full visual graph canvas
 - [ ] Dedicated impact and traceability views
 - [ ] GitHub Pages publishing workflow
 
-## v0.6 — Agent interoperability
-- [ ] Stable JSON context-pack format
-- [ ] MCP-friendly read resources
+## v0.6 — Agent interoperability — in progress
+- [x] Stable JSON context-pack format
+- [x] Machine-readable context-pack schema
+- [x] Bounded context with provenance
+- [x] Relevant quality findings in agent context
+- [ ] MCP adapter exposing graph/context resources
 - [ ] Query presets for transformation roles
-- [ ] Bounded context policies
-- [ ] Provenance/evidence pointers in agent output

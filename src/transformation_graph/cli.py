@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 
+from .agent_context import build_context_pack, write_context_pack
 from .diffing import diff_with_impact, graph_diff
 from .html_export import write_html
 from .importers import graph_from_csv, write_graph
@@ -17,11 +18,11 @@ def _json(value: object) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="transformation-graph", description="Validate, compose, compare, visualize, and query Git-native enterprise transformation graphs.")
     sub = parser.add_subparsers(dest="command", required=True)
-
     validate = sub.add_parser("validate", help="Validate a YAML or JSON graph."); validate.add_argument("file")
     stats = sub.add_parser("stats", help="Show graph statistics."); stats.add_argument("file")
     path = sub.add_parser("path", help="Find the shortest dependency path."); path.add_argument("file"); path.add_argument("source"); path.add_argument("target"); path.add_argument("--undirected", action="store_true")
     context = sub.add_parser("context", help="Emit bounded context around a node."); context.add_argument("file"); context.add_argument("node"); context.add_argument("--depth", type=int, default=1)
+    context_pack = sub.add_parser("context-pack", help="Emit a stable agent-ready bounded context packet."); context_pack.add_argument("file"); context_pack.add_argument("node"); context_pack.add_argument("--depth", type=int, default=1); context_pack.add_argument("--output")
     impact = sub.add_parser("impact", help="Traverse impacted nodes around a root."); impact.add_argument("file"); impact.add_argument("node"); impact.add_argument("--depth", type=int, default=2); impact.add_argument("--direction", choices=["in", "out", "both"], default="both"); impact.add_argument("--relation", action="append", dest="relations")
     quality = sub.add_parser("quality", help="Run opinionated graph quality checks."); quality.add_argument("file"); quality.add_argument("--strict", action="store_true")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
@@ -50,6 +51,11 @@ def main(argv: list[str] | None = None) -> int:
             if result is None: _json({"found": False, "source": args.source, "target": args.target, "path": []}); return 2
             _json({"found": True, "source": args.source, "target": args.target, "path": result}); return 0
         if args.command == "context": _json(graph.context(args.node, args.depth)); return 0
+        if args.command == "context-pack":
+            pack = build_context_pack(graph, args.node, args.depth, source=args.file)
+            if args.output: write_context_pack(pack, args.output); _json({"written": args.output, "root": args.node, "depth": args.depth})
+            else: _json(pack)
+            return 0
         if args.command == "impact": _json(graph.impact(args.node, args.depth, args.direction, set(args.relations) if args.relations else None)); return 0
         if args.command == "quality":
             report = graph.quality(); _json(report); return 3 if args.strict and not report["passed"] else 0

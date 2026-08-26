@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dkharlanau.github.io/transformation-graph/schema/context-pack.schema.json",
+  "title": "Transformation Graph Context Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "project", "query", "root", "graph_stats", "context", "quality_findings", "provenance"],
+  "properties": {
+    "format": {"const": "transformation-graph/context-pack"},
+    "version": {"const": "0.1"},
+    "project": {"type": "object"},
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "depth"],
+      "properties": {
+        "root": {"type": "string", "minLength": 1},
+        "depth": {"type": "integer", "minimum": 0}
+      }
+    },
+    "root": {"type": "object", "required": ["id", "type", "title"]},
+    "graph_stats": {"type": "object"},
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {"type": "array", "items": {"type": "object"}},
+        "edges": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "quality_findings": {"type": "array", "items": {"type": "object"}},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"source": {"type": "string"}}
+    }
+  }
+}

@@ -31,5 +31,7 @@ jobs:
         run: transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
       - name: Smoke test HTML explorer
         run: transformation-graph html examples/sap-s4-customer-migration.yaml --output /tmp/transformation-graph.html && test -s /tmp/transformation-graph.html
+      - name: Smoke test agent context pack
+        run: transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json && test -s /tmp/context-pack.json
       - name: Run tests
         run: pytest -q

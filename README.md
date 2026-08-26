@@ -9,13 +9,11 @@ Transformation Graph links processes, systems, business objects, data, fields, i
 - canonical YAML/JSON graph model and JSON Schema
 - deterministic semantic validation
 - realistic SAP S/4HANA customer migration example
-- dependency paths and bounded machine context
-- impact traversal and project-quality checks
-- Mermaid export
-- dependency-free single-file HTML explorer
-- generic CSV node/edge import
-- deterministic graph composition
+- dependency paths, impact traversal, and quality checks
+- Mermaid export and dependency-free HTML explorer
+- generic CSV import and deterministic graph composition
 - semantic graph diff and neighboring change-impact
+- stable bounded context-pack contract for AI/agent use
 - pytest suite and GitHub Actions quality gate
 
 No SAP system access is required.
@@ -30,6 +28,12 @@ python -m pip install -e ".[dev]"
 transformation-graph validate examples/sap-s4-customer-migration.yaml
 transformation-graph quality examples/sap-s4-customer-migration.yaml
 transformation-graph impact examples/sap-s4-customer-migration.yaml change.bp-model --depth 2
+```
+
+Generate bounded agent context:
+
+```bash
+transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output mapping-context.json
 ```
 
 Generate an offline explorer:
@@ -55,30 +59,11 @@ transformation-graph compose process.yaml data.yaml interfaces.yaml --project-id
 
 Enterprise transformation knowledge is usually fragmented across architecture slides, Excel mappings, Jira, process documents, test evidence, and people's heads. A field changes: which mapping uses it, which interface moves it, which test covers it, which decision created the rule, and which process is affected? Transformation Graph creates the missing cross-artifact dependency layer.
 
-## Core model
-
-```mermaid
-graph LR
-  P[Process] --> S[Process step]
-  S --> SYS[System]
-  S --> I[Interface]
-  S --> M[Mapping]
-  M --> D[Data / fields]
-  M --> R[Rule]
-  REQ[Requirement] --> T[Test]
-  T --> I
-  C[Change] --> D
-  C --> DEC[Decision]
-  DEC --> R
-  DEC --> O[Owner]
-  M --> E[Evidence]
-```
-
-Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [import/composition](docs/importing.md) · [change intelligence](docs/change-intelligence.md) · [HTML explorer](docs/html-explorer.md).
+Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [import/composition](docs/importing.md) · [change intelligence](docs/change-intelligence.md) · [HTML explorer](docs/html-explorer.md) · [agent context](docs/agent-context.md).
 
 ## Agent-ready by design
 
-The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded context subgraph, let the model reason over explicit relationships, and keep deterministic validation outside the model.
+The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded deterministic context pack, let the model reason over explicit relationships, and keep validation/change detection outside the model.
 
 ## Related projects
 
@@ -94,4 +79,4 @@ The useful AI pattern is not to send the whole project to a model. Resolve the n
 
 ## Status
 
-**Executable MVP / v0.5.** The repository now supports authoring, validation, query, import, composition, visualization, quality analysis, and semantic change review.
+**Executable MVP / v0.6.** Authoring, validation, query, import, composition, visualization, quality analysis, semantic change review, and deterministic agent context are implemented.
