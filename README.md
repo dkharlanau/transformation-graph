@@ -4,52 +4,42 @@
 
 Transformation Graph links processes, systems, business objects, data, fields, interfaces, mappings, rules, requirements, tests, changes, decisions, owners, and evidence in one project-scoped graph.
 
-Instead of reconstructing dependencies from PowerPoint, Excel, Jira, architecture diagrams, and tribal knowledge, the project gives those dependencies a small machine-readable representation that can be validated, queried, versioned, and handed to humans or AI agents.
-
-## The problem
-
-Enterprise transformation knowledge is usually fragmented. A field changes: which mapping uses it, which interface moves it, which test covers it, which decision created the rule, and which business process is affected? Transformation Graph targets that missing cross-artifact dependency layer.
+Instead of asking people to reconstruct dependencies from PowerPoint, Excel, Jira, architecture diagrams, and tribal knowledge, the project gives those dependencies a small machine-readable representation that can be validated, queried, versioned, and handed to humans or AI agents.
 
 ## What is executable today
 
-The repository now contains an executable v0.1 MVP:
-
-- canonical YAML/JSON graph model
-- JSON Schema
+- canonical YAML/JSON graph model and JSON Schema
 - semantic validation with dangling-reference and duplicate detection
-- SAP S/4HANA customer migration example
+- realistic SAP S/4HANA customer migration example
 - shortest dependency-path query
-- local context extraction for AI/automation
-- graph inventory/statistics
-- pytest suite
-- GitHub Actions quality gate
+- bounded context extraction for AI/automation
+- impact traversal with direction/relation filters
+- quality checks for orphan/coverage/evidence/ownership gaps
+- Mermaid export for full or focused graph views
+- pytest suite and GitHub Actions quality gate
 
 No SAP system access is required.
 
 ## Quick start
 
-Requires Python 3.10+.
-
 ```bash
 git clone https://github.com/dkharlanau/transformation-graph.git
 cd transformation-graph
 python -m pip install -e ".[dev]"
-
 transformation-graph validate examples/sap-s4-customer-migration.yaml
-transformation-graph stats examples/sap-s4-customer-migration.yaml
+transformation-graph quality examples/sap-s4-customer-migration.yaml
+transformation-graph impact examples/sap-s4-customer-migration.yaml change.bp-model --depth 2
 ```
 
-Find a dependency path:
+Generate a focused Mermaid diagram:
 
 ```bash
-transformation-graph path examples/sap-s4-customer-migration.yaml change.bp-model rule.id-conversion
+transformation-graph mermaid examples/sap-s4-customer-migration.yaml --focus mapping.customer-to-bp --depth 1
 ```
 
-Emit bounded machine-readable context around a mapping:
+## Why this exists
 
-```bash
-transformation-graph context examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1
-```
+Enterprise transformation knowledge is usually fragmented across architecture slides, Excel mappings, Jira, process documents, test evidence, and people's heads. A field changes: which mapping uses it, which interface moves it, which test covers it, which decision created the rule, and which process is affected? Transformation Graph creates the missing cross-artifact dependency layer.
 
 ## Core model
 
@@ -70,39 +60,16 @@ graph LR
   M --> E[Evidence]
 ```
 
-See [docs/model.md](docs/model.md) for the canonical v0.1 model.
-
-## Example: customer migration to SAP S/4HANA
-
-The bundled example connects Legacy SAP ERP -> KNA1 / KUNNR -> customer-to-BP mapping -> ID conversion rule -> load interface -> SAP S/4HANA Business Partner. It also links requirement coverage, reconciliation testing, the Business Partner model change, architecture decision, owner, and mapping evidence.
-
-Open [examples/sap-s4-customer-migration.yaml](examples/sap-s4-customer-migration.yaml).
-
-## Why Git?
-
-Transformation Graph is intentionally project-scoped rather than a replacement enterprise repository. Git gives the model version history, reviewable diffs, branching, pull requests, CI validation, local/offline use, portability, and predictable machine access.
+See [docs/model.md](docs/model.md), [docs/queries.md](docs/queries.md), and [docs/quality.md](docs/quality.md).
 
 ## Agent-ready by design
 
-The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded context subgraph, let the model reason over explicit relationships, and keep deterministic validation outside the model. `transformation-graph context` is the first implementation of that pattern.
-
-## Repository structure
-
-```text
-schema/                         canonical JSON Schema
-src/transformation_graph/       validator and query engine
-examples/                       executable project graphs
-docs/                           model and query documentation
-tests/                          deterministic tests
-.github/workflows/ci.yml        CI validation
-```
+The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded context subgraph, let the model reason over explicit relationships, and keep deterministic validation outside the model. `transformation-graph context` implements that first bounded context pattern.
 
 ## Design principles
 
-- versionable
-- portable
-- machine-readable
-- deterministic-first
+- versionable and portable
+- machine-readable and deterministic-first
 - visual where useful
 - Git-friendly
 - vendor-neutral where practical
@@ -111,7 +78,7 @@ tests/                          deterministic tests
 
 ## Next
 
-The strongest next increments are orphan and coverage analysis, CSV/Excel import, generated Mermaid/HTML views, graph diff between Git revisions, adapters for the related As Code repositories, and MCP-friendly context resources. Track sequencing in [ROADMAP.md](ROADMAP.md).
+The strongest next increments are configurable policy packs, CSV/Excel import, static HTML exploration, graph diff between Git revisions, adapters for the related As Code repositories, and MCP-friendly context resources. Track sequencing in [ROADMAP.md](ROADMAP.md).
 
 ## Related projects
 
@@ -127,4 +94,4 @@ The strongest next increments are orphan and coverage analysis, CSV/Excel import
 
 ## Status
 
-**MVP / v0.1.** The canonical model, validator, CLI queries, example, tests, and CI are implemented. The model is intentionally small and expected to evolve through real transformation cases.
+**MVP / v0.2.** The canonical model, validator, path/context/impact queries, quality checks, Mermaid export, example, tests, and CI are implemented. The model is intentionally small and expected to evolve through real transformation cases.

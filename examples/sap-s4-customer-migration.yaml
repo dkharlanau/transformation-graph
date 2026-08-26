@@ -9,18 +9,10 @@ project:
     evidence, and change can be connected in one graph.
 
 nodes:
-  - id: process.customer-migration
-    type: process
-    title: Migrate customer master
-  - id: step.extract
-    type: process_step
-    title: Extract legacy customer master
-  - id: step.transform
-    type: process_step
-    title: Transform customer data
-  - id: step.load
-    type: process_step
-    title: Load business partner
+  - {id: process.customer-migration, type: process, title: Migrate customer master}
+  - {id: step.extract, type: process_step, title: Extract legacy customer master}
+  - {id: step.transform, type: process_step, title: Transform customer data}
+  - {id: step.load, type: process_step, title: Load business partner}
   - id: system.legacy-erp
     type: system
     title: Legacy SAP ERP
@@ -29,12 +21,8 @@ nodes:
     type: system
     title: SAP S/4HANA
     attributes: {product: SAP S/4HANA}
-  - id: object.customer
-    type: business_object
-    title: Customer
-  - id: object.business-partner
-    type: business_object
-    title: Business Partner
+  - {id: object.customer, type: business_object, title: Customer}
+  - {id: object.business-partner, type: business_object, title: Business Partner}
   - id: data.kna1
     type: data_object
     title: KNA1 customer general data
@@ -51,16 +39,12 @@ nodes:
     type: interface
     title: Customer migration load interface
     attributes: {protocol: file/API}
-  - id: mapping.customer-to-bp
-    type: mapping
-    title: Customer to Business Partner mapping
+  - {id: mapping.customer-to-bp, type: mapping, title: Customer to Business Partner mapping}
   - id: rule.id-conversion
     type: rule
     title: Preserve customer number when target range allows
     description: If the target number range permits external assignment, preserve the source customer number.
-  - id: requirement.traceability
-    type: requirement
-    title: Every migrated customer must be traceable to its source record
+  - {id: requirement.traceability, type: requirement, title: Every migrated customer must be traceable to its source record}
   - id: test.customer-load
     type: test
     title: Customer migration reconciliation test
@@ -69,12 +53,8 @@ nodes:
     type: change
     title: Customer model changes to Business Partner
     description: S/4HANA target uses Business Partner as the leading object.
-  - id: decision.external-number
-    type: decision
-    title: Use external BP numbering for migrated customers
-  - id: owner.master-data
-    type: owner
-    title: Master Data Team
+  - {id: decision.external-number, type: decision, title: Use external BP numbering for migrated customers}
+  - {id: owner.master-data, type: owner, title: Master Data Team}
   - id: evidence.mapping-workbook
     type: evidence
     title: Approved customer mapping workbook
@@ -103,5 +83,6 @@ edges:
   - {from: change.bp-model, to: object.customer, type: affects}
   - {from: change.bp-model, to: object.business-partner, type: introduces}
   - {from: change.bp-model, to: decision.external-number, type: governed_by}
+  - {from: change.bp-model, to: test.customer-load, type: covered_by}
   - {from: decision.external-number, to: rule.id-conversion, type: implements}
   - {from: decision.external-number, to: owner.master-data, type: owned_by}

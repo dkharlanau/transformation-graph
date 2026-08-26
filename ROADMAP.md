@@ -13,12 +13,13 @@
 - [x] Unit tests
 - [x] GitHub Actions CI
 
-## v0.2 — Quality and impact analysis
+## v0.2 — Quality and impact analysis — implemented
 
-- [ ] Orphan detection
-- [ ] Coverage checks: changes without tests, mappings without evidence, objects without owners
-- [ ] Configurable required-relation policies
-- [ ] Impact traversal by relation/type
+- [x] Orphan detection
+- [x] Coverage checks: changes without tests, mappings without evidence, decisions without owners
+- [x] Impact traversal by relation and direction
+- [x] Machine-readable quality report
+- [ ] Configurable required-relation policy packs
 - [ ] Human-readable validation report
 
 ## v0.3 — Import and composition
@@ -32,7 +33,7 @@
 
 ## v0.4 — Generated views
 
-- [ ] Mermaid export
+- [x] Mermaid export
 - [ ] Static HTML explorer
 - [ ] Node detail pages
 - [ ] Impact and traceability views

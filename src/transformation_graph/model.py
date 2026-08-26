@@ -283,3 +283,97 @@ class Graph:
             if edge.source in selected and edge.target in selected
         ]
         return {"root": node_id, "depth": depth, "nodes": nodes, "edges": edges}
+
+    def impact(
+        self,
+        node_id: str,
+        depth: int = 2,
+        direction: str = "both",
+        relations: set[str] | None = None,
+    ) -> dict[str, Any]:
+        if node_id not in self.nodes:
+            raise GraphValidationError(f"unknown node: {node_id}")
+        if depth < 0:
+            raise GraphValidationError("depth must be >= 0")
+        if direction not in {"in", "out", "both"}:
+            raise GraphValidationError("direction must be one of: in, out, both")
+
+        selected = {node_id}
+        frontier = {node_id}
+        for _ in range(depth):
+            next_frontier: set[str] = set()
+            for edge in self.edges:
+                if relations and edge.type not in relations:
+                    continue
+                if direction in {"out", "both"} and edge.source in frontier:
+                    next_frontier.add(edge.target)
+                if direction in {"in", "both"} and edge.target in frontier:
+                    next_frontier.add(edge.source)
+            next_frontier -= selected
+            if not next_frontier:
+                break
+            selected |= next_frontier
+            frontier = next_frontier
+
+        impacted = [
+            {"id": self.nodes[item].id, "type": self.nodes[item].type, "title": self.nodes[item].title}
+            for item in sorted(selected)
+            if item != node_id
+        ]
+        traversed_edges = [
+            edge.as_dict()
+            for edge in self.edges
+            if edge.source in selected and edge.target in selected and (not relations or edge.type in relations)
+        ]
+        return {"root": node_id, "depth": depth, "direction": direction, "relations": sorted(relations) if relations else [], "impacted_nodes": impacted, "edges": traversed_edges}
+
+    def quality(self) -> dict[str, Any]:
+        findings: list[dict[str, str]] = []
+        incident: Counter[str] = Counter()
+        outgoing: dict[str, list[Edge]] = {node_id: [] for node_id in self.nodes}
+        incoming: dict[str, list[Edge]] = {node_id: [] for node_id in self.nodes}
+        for edge in self.edges:
+            incident[edge.source] += 1
+            incident[edge.target] += 1
+            outgoing[edge.source].append(edge)
+            incoming[edge.target].append(edge)
+
+        for node in sorted(self.nodes.values(), key=lambda item: item.id):
+            if incident[node.id] == 0:
+                findings.append({"code": "ORPHAN_NODE", "severity": "error", "node": node.id, "message": f"{node.type} '{node.title}' has no relationships"})
+            if node.type == "mapping" and not any(edge.type == "evidenced_by" for edge in outgoing[node.id]):
+                findings.append({"code": "MAPPING_WITHOUT_EVIDENCE", "severity": "warning", "node": node.id, "message": "mapping has no evidenced_by relationship"})
+            if node.type == "decision" and not any(edge.type == "owned_by" and self.nodes[edge.target].type == "owner" for edge in outgoing[node.id]):
+                findings.append({"code": "DECISION_WITHOUT_OWNER", "severity": "warning", "node": node.id, "message": "decision has no owner"})
+            if node.type == "change" and not any(edge.type in {"covered_by", "validated_by"} and self.nodes[edge.target].type == "test" for edge in outgoing[node.id]):
+                findings.append({"code": "CHANGE_WITHOUT_TEST", "severity": "warning", "node": node.id, "message": "change has no direct test coverage relationship"})
+            if node.type == "test" and not any(edge.type in {"validates", "covers"} for edge in outgoing[node.id]):
+                findings.append({"code": "TEST_WITHOUT_TARGET", "severity": "warning", "node": node.id, "message": "test does not validate or cover another node"})
+
+        errors = sum(item["severity"] == "error" for item in findings)
+        warnings = sum(item["severity"] == "warning" for item in findings)
+        return {"passed": errors == 0 and warnings == 0, "summary": {"errors": errors, "warnings": warnings, "findings": len(findings)}, "findings": findings}
+
+    def mermaid(self, focus: str | None = None, depth: int = 1) -> str:
+        if focus is None:
+            selected = set(self.nodes)
+        else:
+            context = self.context(focus, depth=depth)
+            selected = {item["id"] for item in context["nodes"]}
+        ordered = sorted(selected)
+        aliases = {node_id: f"n{index}" for index, node_id in enumerate(ordered)}
+
+        def escape(value: str) -> str:
+            return value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
+        lines = ["graph LR"]
+        for node_id in ordered:
+            node = self.nodes[node_id]
+            label = escape(f"{node.title} ({node.type})")
+            lines.append(f'  {aliases[node_id]}["{label}"]')
+        for edge in self.edges:
+            if edge.source not in selected or edge.target not in selected:
+                continue
+            label = escape(edge.label or edge.type)
+            lines.append(f"  {aliases[edge.source]} -->|{label}| {aliases[edge.target]}")
+        return "\n".join(lines) + "\n"
