@@ -1,6 +1,6 @@
 name: Transformation Graph Adapter Conformance
-description: Validate a Mapping/Interface/Process-as-Code artifact against the versioned Transformation Graph adapter contract.
-author: Dzmitryi Kharlanau
+description: "Validate a Mapping/Interface/Process-as-Code artifact against the versioned Transformation Graph adapter contract."
+author: "Dzmitryi Kharlanau"
 
 branding:
   icon: share-2
@@ -8,27 +8,27 @@ branding:
 
 inputs:
   kind:
-    description: Adapter kind: mapping, interface, or process.
+    description: "Adapter kind: mapping, interface, or process."
     required: true
   input:
-    description: Path to the as-code YAML document in the caller repository.
+    description: "Path to the as-code YAML document in the caller repository."
     required: true
   fail-on:
-    description: Conformance failure threshold: error, warning, or never.
+    description: "Conformance failure threshold: error, warning, or never."
     required: false
     default: error
   report-path:
-    description: JSON report path written in the caller workspace.
+    description: "JSON report path written in the caller workspace."
     required: false
     default: transformation-graph-conformance.json
   python-version:
-    description: Python version used to run the checker.
+    description: "Python version used to run the checker."
     required: false
     default: "3.12"
 
 outputs:
   report-path:
-    description: Path to the generated conformance report.
+    description: "Path to the generated conformance report."
     value: ${{ inputs.report-path }}
 
 runs:
