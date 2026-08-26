@@ -1,69 +1,63 @@
 # Roadmap
 
-## v0.1 — Executable core — implemented
-- [x] Canonical graph format and JSON Schema
-- [x] YAML/JSON loader and semantic validation
-- [x] SAP S/4HANA example
-- [x] Stats, path, bounded context
-- [x] Tests and CI
+## v0.1–v0.9 — Foundation — implemented
 
-## v0.2 — Quality and impact — implemented
-- [x] Orphan and coverage checks
-- [x] Impact traversal by relation and direction
-- [x] Machine-readable quality report
-- [x] Mermaid export
-- [x] Configurable policy packs
+- canonical graph format, schema, YAML/JSON loader, validation, stats, paths, context
+- quality checks, impact traversal, Mermaid, configurable policy packs
+- CSV/Excel import, graph composition, Mapping/Interface/Process-as-Code adapters
+- semantic diff, neighboring change impact, PR review reports
+- HTML explorer and interactive SVG dependency canvas
+- bounded agent context and MCP v2 server
+- governance policy engine and CI thresholds
 
-## v0.3 — Import and composition — implemented
-- [x] CSV importer
-- [x] Excel importer
-- [x] Compose multiple graph files
-- [x] Mapping as Code adapter
-- [x] Interface as Code adapter
-- [x] Process as Code adapter
+## v0.10 — Traceability and role views — implemented
 
-## v0.4 — Change intelligence — implemented
-- [x] Semantic graph diff between snapshots
-- [x] Changed roots and neighboring impact
-- [x] Markdown/JSON GitHub PR review summary
-- [ ] Optional PR comment/check annotation action
+- [x] JSON/Markdown/CSV traceability matrix
+- [x] deterministic relation-aware shortest paths
+- [x] architect role view
+- [x] integration role view
+- [x] data role view
+- [x] test role view
+- [x] cutover role view
+- [x] MCP traceability and role-view tools
 
-## v0.5 — Generated views — in progress
-- [x] Dependency-free static HTML explorer
-- [x] Search, type filter, node detail, direct relations
-- [x] Interactive SVG dependency graph canvas
-- [ ] Dedicated impact and traceability views
-- [ ] GitHub Pages publishing workflow
+## v0.11 — Adapter conformance — implemented
 
-## v0.6 — Agent context — implemented
-- [x] Stable JSON context-pack format and schema
-- [x] Bounded context with provenance
-- [x] Relevant quality findings in agent context
+- [x] Mapping-as-Code semantic conformance
+- [x] Interface-as-Code semantic conformance
+- [x] Process-as-Code semantic conformance and reachability checks
+- [x] fail-on error/warning thresholds
+- [x] reconciled same-ID composition for compatible adapter metadata
+- [x] direct normalize → conformance → compose CLI flow
 
-## v0.7 — MCP adapter — implemented
-- [x] Official MCP Python SDK v2 adapter
-- [x] Project and bounded-context resources
-- [x] Context/path/impact/quality tools
-- [x] stdio transport
-- [x] Streamable HTTP transport
-- [ ] Authentication/deployment profile
-- [ ] Query presets for transformation roles
+## v0.12 — Static publishing — implemented
 
-## v0.8 — Enterprise ingestion — implemented
-- [x] Excel workbook contract compatible with CSV inventories
-- [x] Field-level mapping normalization
-- [x] Interface operational-context normalization
-- [x] Process step/transition/control/evidence normalization
+- [x] portable static site bundle
+- [x] human landing page and SVG explorer
+- [x] canonical graph/catalog/manifest artifacts
+- [x] role reports in HTML/JSON/Markdown/CSV
+- [x] `llms.txt`, sitemap, robots, `.nojekyll`
+- [x] GitHub Pages deployment workflow
+- [ ] enable GitHub Actions as Pages publishing source and perform first deployment
 
-## v0.9 — Governance and review — implemented
-- [x] Generic policy-pack engine
-- [x] Error/warning CI thresholds
-- [x] Change-review report with impact and quality/policy deltas
-- [x] Self-dogfooded pull-request summary workflow
+## v0.13 — Release readiness — implemented
 
-## Next
-- [ ] Adapter contract versioning and conformance fixtures across sibling repositories
-- [ ] Traceability matrix export
-- [ ] Role-oriented query presets: architect, data lead, integration lead, test lead, cutover lead
-- [ ] Published package/release workflow
-- [ ] GitHub Pages project explorer
+- [x] wheel + source-distribution build verification
+- [x] package discovery metadata and project URLs
+- [x] synchronized public/distribution version test
+- [x] tag/version verification
+- [x] tag-driven GitHub Release workflow
+- [x] SHA-256 release checksums
+- [x] changelog and release runbook
+- [ ] create first intentional public tag/release
+- [ ] decide whether/when to enable PyPI trusted publishing
+
+## Next high-value work
+
+- [ ] versioned adapter contracts and conformance fixtures shared with sibling repositories
+- [ ] graph coverage/traceability scorecards for program governance
+- [ ] dedicated change, test coverage, and ownership views in the site
+- [ ] generic GraphML export and optional graph-database adapters
+- [ ] PR comment/check annotations in addition to Actions Summary
+- [ ] MCP authentication/deployment profile for remote project graphs
+- [ ] larger multi-domain reference transformation composed from sibling as-code projects

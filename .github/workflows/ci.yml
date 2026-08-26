@@ -71,3 +71,8 @@ jobs:
         run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 6; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
       - name: Run tests
         run: pytest -q
+      - name: Build wheel and source distribution
+        run: |
+          python -m build --outdir /tmp/dist
+          test "$(find /tmp/dist -maxdepth 1 -name '*.whl' | wc -l)" -eq 1
+          test "$(find /tmp/dist -maxdepth 1 -name '*.tar.gz' | wc -l)" -eq 1

@@ -1,26 +1,39 @@
 # Transformation Graph
 
-**A Git-native connective layer for enterprise transformations.**
+**Git-native enterprise transformation traceability across processes, systems, data, interfaces, mappings, tests, changes, decisions, ownership, and evidence.**
 
-Transformation Graph links processes, systems, business objects, data, fields, interfaces, mappings, rules, requirements, tests, changes, decisions, owners, and evidence in one project-scoped graph. It is designed for SAP and enterprise transformation work where useful knowledge otherwise lives across Excel, architecture diagrams, process documents, mapping workbooks, tickets, test evidence, and people's heads.
+[![CI](https://github.com/dkharlanau/transformation-graph/actions/workflows/ci.yml/badge.svg)](https://github.com/dkharlanau/transformation-graph/actions/workflows/ci.yml)
 
-## What is executable today
-
-- canonical YAML/JSON graph model and JSON Schema
-- deterministic semantic validation, dependency paths, impact traversal, and quality checks
-- realistic SAP S/4HANA customer migration example
-- generic CSV and Excel ingestion
-- Mapping as Code, Interface as Code, and Process as Code adapters
-- deterministic graph composition across artifact slices
-- configurable governance policy packs with CI failure thresholds
-- semantic graph diff, neighboring change-impact, and Markdown/JSON PR review reports
-- dependency-free HTML explorer with interactive SVG dependency canvas
-- Mermaid export
-- stable bounded agent context-pack contract with provenance
-- optional MCP v2 server exposing graph resources and deterministic tools
-- pytest suite and GitHub Actions quality/policy gates
+Transformation Graph is a lightweight dependency layer for SAP S/4HANA and other enterprise transformation programs. It turns fragmented project knowledge from Excel, architecture diagrams, interface specifications, mapping workbooks, process definitions, test evidence, and change records into one versionable graph that people, CI pipelines, and AI agents can query deterministically.
 
 No SAP system access is required.
+
+## Questions it is designed to answer
+
+- Which mappings and rules depend on this field?
+- Which interfaces and systems are downstream of this change?
+- Which process steps use the affected interface?
+- Which tests cover the requirement or change?
+- Which decision or owner governs the rule?
+- What changed between two graph snapshots, and what else is impacted?
+- Which transformation relationships are missing evidence, ownership, test coverage, or policy-required links?
+
+## Executable capabilities
+
+- canonical YAML/JSON graph model and JSON Schema
+- deterministic validation, shortest paths, bounded context, impact traversal, and quality checks
+- traceability matrix export to JSON, Markdown, and CSV
+- role-oriented views for architect, integration, data, test, and cutover work
+- generic CSV and Excel ingestion
+- Mapping as Code, Interface as Code, and Process as Code adapters
+- semantic adapter conformance and reconciled cross-artifact composition
+- configurable governance policy packs with CI failure thresholds
+- semantic graph diff and Markdown/JSON change-review reports
+- dependency-free HTML explorer with interactive SVG graph canvas
+- portable static site bundle with canonical JSON, catalog, manifest, role reports, sitemap, robots metadata, and `llms.txt`
+- bounded agent context packs with provenance
+- optional MCP v2 server with deterministic context/path/impact/quality/traceability tools
+- GitHub Actions CI, PR review, Pages, and tag-driven release workflows
 
 ## Quick start
 
@@ -35,36 +48,30 @@ transformation-graph policy examples/sap-s4-customer-migration.yaml \
   --pack policies/enterprise-baseline.yaml --fail-on error
 ```
 
-Generate a visual explorer:
+## Traceability instead of document hunting
+
+Generate a field-level matrix:
 
 ```bash
-transformation-graph html examples/sap-s4-customer-migration.yaml \
-  --output transformation-graph.html
+transformation-graph trace examples/sap-s4-customer-migration.yaml \
+  --from-type mapping --to-type field --max-depth 3 \
+  --format markdown --output traceability.md
 ```
 
-Generate a deterministic change-review report:
+Generate a role-oriented view:
 
 ```bash
-transformation-graph review \
-  examples/change/before.yaml \
-  examples/change/after.yaml \
-  --impact-depth 2 \
-  --policy policies/change-readiness.yaml \
-  --output review.md
+transformation-graph role-view examples/sap-s4-customer-migration.yaml integration \
+  --format csv --output integration-traceability.csv
+
+transformation-graph roles
 ```
 
-## Bring existing project artifacts into the graph
+Role presets currently cover `architect`, `integration`, `data`, `test`, and `cutover`. The reports contain deterministic shortest paths and coverage gaps; they are not generated narrative summaries.
 
-CSV inventories:
+## Bring enterprise artifacts into the graph
 
-```bash
-transformation-graph import-csv \
-  --nodes nodes.csv --edges edges.csv \
-  --project-id demo --project-name "Demo" \
-  --output demo.yaml
-```
-
-Excel workbooks use the same contract in `Nodes` and `Edges` worksheets. Excel support is optional:
+CSV and Excel inventories use `Nodes` and `Edges` contracts. Excel support is optional:
 
 ```bash
 python -m pip install -e ".[excel]"
@@ -73,64 +80,80 @@ transformation-graph import-excel transformation-inventory.xlsx \
   --output program.yaml
 ```
 
-Normalize neighboring as-code artifacts:
+Normalize and conformance-check neighboring as-code artifacts:
 
 ```bash
-transformation-graph import-adapter mapping examples/adapters/mapping.yaml --output mapping.graph.yaml
-transformation-graph import-adapter interface examples/adapters/interface.yaml --output interface.graph.yaml
-transformation-graph import-adapter process examples/adapters/process.yaml --output process.graph.yaml
+transformation-graph adapter-check mapping examples/adapters/mapping.yaml
+transformation-graph adapter-check interface examples/adapters/interface.yaml
+transformation-graph adapter-check process examples/adapters/process.yaml
+```
 
-transformation-graph compose \
-  mapping.graph.yaml interface.graph.yaml process.graph.yaml \
+Compose them directly without intermediate graph files:
+
+```bash
+transformation-graph compose-adapters \
+  --mapping examples/adapters/mapping.yaml \
+  --interface examples/adapters/interface.yaml \
+  --process examples/adapters/process.yaml \
   --project-id customer-domain --project-name "Customer Domain" \
   --output customer-domain.graph.yaml
 ```
 
-The adapters preserve useful semantics instead of flattening the source documents: mapping fields become explicit field/rule traceability; interfaces retain systems, objects, ownership, mapping references, tests, and operational metadata; processes retain steps, transitions, roles, systems, objects, controls, risks, evidence, and interface usage.
+Same-ID nodes are reconciled only when their metadata is compatible. Conflicting attributes stop composition instead of being silently guessed.
 
-## Governance as code
-
-Built-in quality checks catch structural problems. Policy packs add project-specific expectations without hard-coding them into the graph engine.
-
-Supported policy rule primitives in v0.9:
-
-- `forbid_orphan`
-- `require_attribute`
-- `require_relation`
-
-Rules can target node types, relation direction/type, counterpart node type, minimum relation counts, and severity. The repository includes `enterprise-baseline` and `change-readiness` examples.
+## Governance and change review
 
 ```bash
 transformation-graph policy graph.yaml \
-  --pack policies/enterprise-baseline.yaml \
-  --fail-on error
+  --pack policies/enterprise-baseline.yaml --fail-on error
+
+transformation-graph review before.yaml after.yaml \
+  --impact-depth 2 \
+  --policy policies/change-readiness.yaml \
+  --output review.md
 ```
 
-## PR/change review
+The review combines semantic diff, changed roots, neighboring impact, deterministic attention signals, built-in quality delta, and optional policy delta. `.github/workflows/pr-graph-review.yml` demonstrates the pattern in GitHub Actions.
 
-`transformation-graph review` combines semantic graph diff, changed roots, neighboring impact, deterministic review attention, built-in quality delta, and optional policy delta. It emits Markdown for `GITHUB_STEP_SUMMARY` or JSON for automation.
+## Visual and static publishing
 
-The repository self-tests this pattern in `.github/workflows/pr-graph-review.yml`.
-
-## Agent/MCP use
+Generate one offline explorer:
 
 ```bash
-transformation-graph context-pack \
-  examples/sap-s4-customer-migration.yaml \
-  mapping.customer-to-bp --depth 1
-
-transformation-graph mcp examples/sap-s4-customer-migration.yaml
+transformation-graph html graph.yaml --output explorer.html
 ```
 
-The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded deterministic context pack, let the model reason over explicit relationships, and keep validation, policy checks, and change detection outside the model.
+Generate a portable website:
 
-## Why this matters
+```bash
+transformation-graph site graph.yaml \
+  --output _site \
+  --base-url https://example.com/transformation-graph/
+```
 
-A field changes. Which mapping reads it? Which interface carries the result? Which process step depends on the interface? Which test covers the change? Which decision introduced the rule? Who owns the decision? Which evidence supports the mapping?
+The site contains a human landing page and explorer plus `graph.json`, `catalog.json`, `manifest.json`, `llms.txt`, role-specific HTML/JSON/Markdown/CSV reports, `robots.txt`, and `sitemap.xml`. `.github/workflows/pages.yml` can publish the same bundle to GitHub Pages after GitHub Actions is selected once as the repository's Pages publishing source.
 
-Those questions are usually answered by manually reconciling several tools and documents. Transformation Graph makes those relationships explicit, versionable, queryable, reviewable in Git, and consumable by both people and agents.
+## Agent and MCP use
 
-Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality](docs/quality.md) · [enterprise ingestion](docs/enterprise-ingestion.md) · [policies and PR review](docs/policies-and-review.md) · [change intelligence](docs/change-intelligence.md) · [HTML explorer](docs/html-explorer.md) · [agent context](docs/agent-context.md) · [MCP adapter](docs/mcp.md).
+```bash
+transformation-graph context-pack graph.yaml mapping.customer-to-bp --depth 1
+python -m pip install -e ".[mcp]"
+transformation-graph mcp graph.yaml
+```
+
+The useful AI pattern is bounded retrieval over explicit relationships: resolve a stable node, traverse only relevant dependencies, and keep validation, policy checks, graph diff, and traceability deterministic outside the language model.
+
+## Build and release readiness
+
+```bash
+python -m build
+```
+
+CI verifies wheel and source-distribution builds. A pushed tag such as `v0.13.0` triggers `.github/workflows/release.yml`, which verifies that tag and package versions match and creates a GitHub Release with distribution files and SHA-256 checksums. PyPI publishing is intentionally not enabled yet.
+
+## Documentation
+
+[Model](docs/model.md) · [Queries](docs/queries.md) · [Quality](docs/quality.md) · [Enterprise ingestion](docs/enterprise-ingestion.md) · [Policies and PR review](docs/policies-and-review.md) · [Change intelligence](docs/change-intelligence.md) · [HTML explorer](docs/html-explorer.md) · [Agent context](docs/agent-context.md) · [MCP](docs/mcp.md) · [Releasing](docs/releasing.md)
 
 ## Related projects
 
@@ -146,4 +169,4 @@ Documentation: [model](docs/model.md) · [queries](docs/queries.md) · [quality]
 
 ## Status
 
-**Executable MVP / v0.9.** Authoring, validation, enterprise ingestion, adapter composition, governance policies, query/impact, visualization, semantic change review, deterministic agent context, and MCP access are implemented.
+**Executable alpha / v0.13.** The core graph, enterprise ingestion, adapter conformance/composition, governance, traceability, impact/change review, visual/static publishing, bounded agent context, MCP access, CI, and release build path are implemented.

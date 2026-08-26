@@ -2,17 +2,19 @@ name: Transformation Graph
 repository: transformation-graph
 owner: dkharlanau
 visibility: public
-status: mvp-v0.9
+status: alpha-v0.13
 implementation:
   repository_created: true
-  implementation_status: executable-mvp
+  implementation_status: executable-alpha
   model_version: "0.1"
-  feature_version: "0.9"
-  package_version: "0.9.0"
+  feature_version: "0.13"
+  package_version: "0.13.0"
   codex_fit: 5/5
   sap_access_required: false
   ci: true
   tests: true
+  package_build: true
+  release_workflow: true
 capabilities:
   - yaml-json-model
   - semantic-validation
@@ -22,15 +24,21 @@ capabilities:
   - impact-analysis
   - quality-checks
   - policy-packs
+  - traceability-matrix
+  - role-oriented-views
   - mermaid-export
   - html-explorer
   - svg-graph-canvas
+  - static-site-bundle
+  - llms-index
+  - sitemap
   - csv-import
   - excel-import
   - mapping-as-code-adapter
   - interface-as-code-adapter
   - process-as-code-adapter
-  - graph-composition
+  - adapter-conformance
+  - reconciled-composition
   - graph-diff
   - change-impact
   - pr-review-report
@@ -40,6 +48,8 @@ capabilities:
   - mcp-v2-server
   - mcp-resources
   - mcp-tools
+  - pages-workflow
+  - release-build
   - json-schema
 principles:
   - versionable
@@ -50,10 +60,13 @@ principles:
   - git-friendly
   - interoperable
   - bounded-context
+  - fail-loud-on-conflict
 primary_users:
   - SAP consultants
   - enterprise architects
   - data consultants
   - integration consultants
+  - test leads
+  - cutover leads
   - business analysts
   - transformation teams
