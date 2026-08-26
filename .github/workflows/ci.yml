@@ -58,6 +58,13 @@ jobs:
         run: transformation-graph review examples/change/before.yaml examples/change/after.yaml --impact-depth 1 --policy policies/change-readiness.yaml --output /tmp/review.md && test -s /tmp/review.md
       - name: Smoke test HTML explorer
         run: transformation-graph html examples/sap-s4-customer-migration.yaml --output /tmp/transformation-graph.html && test -s /tmp/transformation-graph.html
+      - name: Smoke test static site bundle
+        run: |
+          transformation-graph site examples/sap-s4-customer-migration.yaml --output /tmp/site --base-url https://example.test/transformation-graph/
+          test -s /tmp/site/index.html
+          test -s /tmp/site/graph.json
+          test -s /tmp/site/llms.txt
+          test -s /tmp/site/roles/architect.json
       - name: Smoke test agent context pack
         run: transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json && test -s /tmp/context-pack.json
       - name: Smoke test MCP registration

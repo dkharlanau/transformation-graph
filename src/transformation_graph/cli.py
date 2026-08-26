@@ -19,6 +19,7 @@ from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
 from .policy import evaluate_policy_files, should_fail
 from .review import build_review_report, write_review_report
+from .site_export import build_site
 from .traceability import (
     ROLE_PRESETS,
     list_role_presets,
@@ -36,7 +37,7 @@ def _json(value: object) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="transformation-graph",
-        description="Validate, compose, compare, govern, visualize, import, and query Git-native enterprise transformation graphs.",
+        description="Validate, compose, compare, govern, visualize, import, publish, and query Git-native enterprise transformation graphs.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
     validate = sub.add_parser("validate", help="Validate a YAML or JSON graph."); validate.add_argument("file")
@@ -49,6 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     policy = sub.add_parser("policy", help="Evaluate configurable governance policy packs."); policy.add_argument("file"); policy.add_argument("--pack", action="append", required=True, dest="packs"); policy.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
     html = sub.add_parser("html", help="Generate a dependency-free single-file HTML/SVG explorer."); html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
+    site = sub.add_parser("site", help="Generate a portable static site bundle with explorer and machine-readable artifacts."); site.add_argument("file"); site.add_argument("--output", required=True); site.add_argument("--title"); site.add_argument("--base-url")
     trace = sub.add_parser("trace", help="Build shortest-path traceability between node types."); trace.add_argument("file"); trace.add_argument("--from-type", action="append", required=True, dest="source_types"); trace.add_argument("--to-type", action="append", required=True, dest="target_types"); trace.add_argument("--max-depth", type=int, default=4); trace.add_argument("--directed", action="store_true"); trace.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); trace.add_argument("--output")
     role_view = sub.add_parser("role-view", help="Generate a role-oriented traceability view."); role_view.add_argument("file"); role_view.add_argument("role", choices=sorted(ROLE_PRESETS)); role_view.add_argument("--max-depth", type=int, default=4); role_view.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); role_view.add_argument("--output")
     sub.add_parser("roles", help="List built-in role-oriented traceability presets.")
@@ -128,6 +130,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
+        if args.command == "site":
+            manifest = build_site(graph, args.output, args.title, args.base_url); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
         if args.command == "trace":
             report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
         if args.command == "role-view":
