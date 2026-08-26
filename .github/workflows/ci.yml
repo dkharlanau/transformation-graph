@@ -29,7 +29,13 @@ jobs:
         run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
       - name: Smoke test declarative project build
         run: |
-          transformation-graph build-project examples/project/transformation-project.yaml --output-dir /tmp/project-build --site
+          status=0
+          transformation-graph build-project examples/project/transformation-project.yaml --output-dir /tmp/project-build --site || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "### Governed project build diagnostics"
+            cat /tmp/project-build/build-report.json || true
+            exit "$status"
+          fi
           transformation-graph validate /tmp/project-build/graph.yaml
           test -s /tmp/project-build/build-report.json
           test -s /tmp/project-build/site/index.html
