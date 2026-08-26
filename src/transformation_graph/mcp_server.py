@@ -7,6 +7,7 @@ from mcp.server import MCPServer
 
 from .agent_context import build_context_pack
 from .model import Graph
+from .traceability import ROLE_PRESETS, role_traceability, traceability_matrix
 
 Transport = Literal["stdio", "streamable-http"]
 
@@ -61,6 +62,27 @@ def create_mcp_server(graph_path: str | Path) -> MCPServer:
     def graph_quality() -> dict:
         """Return deterministic orphan, coverage, evidence, and ownership findings."""
         return graph.quality()
+
+    @mcp.tool()
+    def traceability(source_type: str, target_type: str, max_depth: int = 4, directed: bool = False) -> dict:
+        """Build shortest-path traceability between two node types."""
+        return traceability_matrix(
+            graph,
+            {source_type},
+            {target_type},
+            max_depth=max_depth,
+            undirected=not directed,
+        )
+
+    @mcp.tool()
+    def role_view(role: str, max_depth: int = 4) -> dict:
+        """Return a built-in role-oriented traceability view."""
+        if role not in ROLE_PRESETS:
+            return {
+                "error": f"unknown role: {role}",
+                "available_roles": sorted(ROLE_PRESETS),
+            }
+        return role_traceability(graph, role, max_depth=max_depth)
 
     return mcp
 

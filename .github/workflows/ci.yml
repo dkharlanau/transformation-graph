@@ -25,6 +25,12 @@ jobs:
         run: transformation-graph quality examples/sap-s4-customer-migration.yaml --strict
       - name: Policy gate canonical example
         run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
+      - name: Smoke test traceability and role views
+        run: |
+          transformation-graph trace examples/sap-s4-customer-migration.yaml --from-type mapping --to-type field --max-depth 2 --format markdown --output /tmp/traceability.md
+          transformation-graph role-view examples/sap-s4-customer-migration.yaml integration --format json --output /tmp/integration-role.json
+          test -s /tmp/traceability.md
+          test -s /tmp/integration-role.json
       - name: Smoke test CSV import
         run: transformation-graph import-csv --nodes examples/csv/nodes.csv --edges examples/csv/edges.csv --project-id csv-ci --project-name "CSV CI" --output /tmp/csv-ci.yaml
       - name: Validate imported graph
@@ -46,6 +52,6 @@ jobs:
       - name: Smoke test agent context pack
         run: transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json && test -s /tmp/context-pack.json
       - name: Smoke test MCP registration
-        run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 4; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
+        run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 6; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
       - name: Run tests
         run: pytest -q

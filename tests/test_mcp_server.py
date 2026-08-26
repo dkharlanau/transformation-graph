@@ -12,7 +12,14 @@ def test_mcp_server_registers_bounded_resources_and_tools():
     resources = asyncio.run(server.list_resources())
     templates = asyncio.run(server.list_resource_templates())
 
-    assert {tool.name for tool in tools} == {"get_context", "find_path", "analyze_impact", "graph_quality"}
+    assert {tool.name for tool in tools} == {
+        "get_context",
+        "find_path",
+        "analyze_impact",
+        "graph_quality",
+        "traceability",
+        "role_view",
+    }
     assert len(resources) == 1
     assert str(resources[0].uri).rstrip("/") == "transformation-graph://project"
     assert len(templates) == 1

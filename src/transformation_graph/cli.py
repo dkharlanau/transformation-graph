@@ -12,6 +12,14 @@ from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
 from .policy import evaluate_policy_files, should_fail
 from .review import build_review_report, write_review_report
+from .traceability import (
+    ROLE_PRESETS,
+    list_role_presets,
+    render_traceability_report,
+    role_traceability,
+    traceability_matrix,
+    write_traceability_report,
+)
 
 
 def _json(value: object) -> None:
@@ -19,7 +27,10 @@ def _json(value: object) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="transformation-graph", description="Validate, compose, compare, govern, visualize, import, and query Git-native enterprise transformation graphs.")
+    parser = argparse.ArgumentParser(
+        prog="transformation-graph",
+        description="Validate, compose, compare, govern, visualize, import, and query Git-native enterprise transformation graphs.",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
     validate = sub.add_parser("validate", help="Validate a YAML or JSON graph."); validate.add_argument("file")
     stats = sub.add_parser("stats", help="Show graph statistics."); stats.add_argument("file")
@@ -31,6 +42,9 @@ def build_parser() -> argparse.ArgumentParser:
     policy = sub.add_parser("policy", help="Evaluate configurable governance policy packs."); policy.add_argument("file"); policy.add_argument("--pack", action="append", required=True, dest="packs"); policy.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
     html = sub.add_parser("html", help="Generate a dependency-free single-file HTML/SVG explorer."); html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
+    trace = sub.add_parser("trace", help="Build shortest-path traceability between node types."); trace.add_argument("file"); trace.add_argument("--from-type", action="append", required=True, dest="source_types"); trace.add_argument("--to-type", action="append", required=True, dest="target_types"); trace.add_argument("--max-depth", type=int, default=4); trace.add_argument("--directed", action="store_true"); trace.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); trace.add_argument("--output")
+    role_view = sub.add_parser("role-view", help="Generate a role-oriented traceability view."); role_view.add_argument("file"); role_view.add_argument("role", choices=sorted(ROLE_PRESETS)); role_view.add_argument("--max-depth", type=int, default=4); role_view.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); role_view.add_argument("--output")
+    sub.add_parser("roles", help="List built-in role-oriented traceability presets.")
     import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files."); import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
     import_excel = sub.add_parser("import-excel", help="Build a graph from an Excel workbook with Nodes and Edges sheets."); import_excel.add_argument("workbook"); import_excel.add_argument("--nodes-sheet", default="Nodes"); import_excel.add_argument("--edges-sheet", default="Edges"); import_excel.add_argument("--project-id", required=True); import_excel.add_argument("--project-name", required=True); import_excel.add_argument("--description"); import_excel.add_argument("--output", required=True)
     import_adapter = sub.add_parser("import-adapter", help="Normalize a Mapping/Interface/Process-as-Code document into the canonical graph."); import_adapter.add_argument("kind", choices=["mapping", "interface", "process"]); import_adapter.add_argument("input"); import_adapter.add_argument("--project-id"); import_adapter.add_argument("--project-name"); import_adapter.add_argument("--output", required=True)
@@ -41,9 +55,19 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _emit_trace_report(report: dict, format: str, output: str | None) -> None:
+    if output:
+        write_traceability_report(report, output, format)  # type: ignore[arg-type]
+        _json({"written": output, "format": format, "paths": report["summary"]["paths"]})
+    else:
+        print(render_traceability_report(report, format), end="")  # type: ignore[arg-type]
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "roles":
+            _json(list_role_presets()); return 0
         if args.command == "import-csv":
             graph = graph_from_csv(args.nodes, args.edges, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "import-excel":
@@ -63,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
                 if exc.name == "mcp": print('ERROR: MCP support is optional. Install with: pip install -e ".[mcp]"', file=sys.stderr); return 1
                 raise
             run_mcp_server(args.file, transport=args.transport, host=args.host, port=args.port); return 0
+
         graph = Graph.from_file(args.file)
         if args.command == "validate": _json({"valid": True, **graph.stats()}); return 0
         if args.command == "stats": _json(graph.stats()); return 0
@@ -81,6 +106,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
+        if args.command == "trace":
+            report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
+        if args.command == "role-view":
+            report = role_traceability(graph, args.role, args.max_depth); _emit_trace_report(report, args.format, args.output); return 0
     except (OSError, GraphValidationError, ValueError, TypeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr); return 1
     return 1
