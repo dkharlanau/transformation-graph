@@ -38,7 +38,7 @@ jobs:
           test -s /tmp/graph.graphml
           grep -q 'transformation-graph-adapter' /tmp/adapter-contract.json
       - name: Self-test reusable adapter action
-        uses: ./
+        uses: dkharlanau/transformation-graph@main
         with:
           kind: mapping
           input: conformance/adapter-v0.1/mapping.pass.yaml
