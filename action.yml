@@ -26,11 +26,6 @@ inputs:
     required: false
     default: "3.12"
 
-outputs:
-  report-path:
-    description: "Path to the generated conformance report."
-    value: ${{ inputs.report-path }}
-
 runs:
   using: composite
   steps:
