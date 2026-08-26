@@ -1,0 +1,70 @@
+contract:
+  id: transformation-graph-adapter
+  version: "0.1"
+  canonical_graph_version: "0.1"
+  purpose: >
+    Semantic normalization contract for as-code artifacts consumed by
+    Transformation Graph. It defines graph meaning, not the source repository's
+    complete YAML syntax.
+
+common:
+  source_format:
+    required: true
+    project_attribute: source_format
+    values: [mapping-as-code, interface-as-code, process-as-code]
+  identifiers:
+    stable: true
+    description: Normalized node IDs must be deterministic for the same source identity.
+  conflicts:
+    behavior: fail-loud
+    description: Incompatible same-ID metadata must not be silently guessed during composition.
+
+adapters:
+  mapping:
+    root_node_type: mapping
+    required_relations:
+      - {from: mapping, relation: maps_from, to: data_object, cardinality: "1+"}
+      - {from: mapping, relation: maps_to, to: data_object, cardinality: "1+"}
+    field_rules:
+      node_type: rule
+      relation_from_mapping: contains_rule
+      required_relations:
+        - {from: rule, relation: reads, to: field, cardinality: "1+"}
+        - {from: rule, relation: writes, to: field, cardinality: "1+"}
+    recommendations:
+      - Mapping nodes should be traceable to evidence in governed project graphs.
+
+  interface:
+    root_node_type: interface
+    required_relations:
+      - {from: interface, relation: sourced_from, to: system, cardinality: "1+"}
+      - {from: interface, relation: delivers_to, to: system, cardinality: "1+"}
+    recommended_relations:
+      - {from: interface, relation: owned_by, to: owner, cardinality: "1+"}
+      - {from: test, relation: validates, to: interface, cardinality: "1+"}
+    optional_relations:
+      - {from: interface, relation: uses_mapping, to: mapping}
+      - {from: interface, relation: routes_via, to: system}
+      - {from: interface, relation: reads, to: data_object}
+      - {from: interface, relation: writes, to: data_object}
+
+  process:
+    root_node_type: process
+    step_node_type: process_step
+    required_relations:
+      - {from: process, relation: contains, to: process_step, cardinality: "1+"}
+    flow_relation: precedes
+    start:
+      project_source_field: process.start
+      normalized_attribute: start
+      requirement: Declared start must resolve to a contained process step.
+    reachability:
+      requirement: Every contained process step should be reachable from the declared start.
+    user_task:
+      recommended_relation: {from: process_step, relation: performed_by, to: owner}
+    service_task:
+      recommendation: A service task should have runs_in system and/or uses_interface interface.
+
+severity_model:
+  error: Contract-required semantics are absent or inconsistent.
+  warning: Recommended governance or execution semantics are absent.

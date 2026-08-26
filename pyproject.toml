@@ -4,23 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transformation-graph"
-version = "0.15.0"
+version = "0.16.0"
 description = "Git-native enterprise transformation graphs for traceability, impact analysis, governance, and agent context."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Dzmitryi Kharlanau"}]
-keywords = [
-  "enterprise-transformation",
-  "sap",
-  "s4hana",
-  "traceability",
-  "data-lineage",
-  "impact-analysis",
-  "knowledge-graph",
-  "architecture-as-code",
-  "mcp",
-]
+keywords = ["enterprise-transformation", "sap", "s4hana", "traceability", "data-lineage", "impact-analysis", "knowledge-graph", "architecture-as-code", "mcp", "graphml"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -47,6 +37,9 @@ Issues = "https://github.com/dkharlanau/transformation-graph/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+transformation_graph = ["contracts/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

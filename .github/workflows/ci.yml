@@ -27,6 +27,12 @@ jobs:
         run: transformation-graph scorecard examples/sap-s4-customer-migration.yaml --format markdown --output /tmp/scorecard.md --fail-below 50
       - name: Policy gate canonical example
         run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
+      - name: Smoke test GraphML and adapter contract
+        run: |
+          transformation-graph graphml examples/sap-s4-customer-migration.yaml --output /tmp/graph.graphml
+          transformation-graph adapter-contract --format json > /tmp/adapter-contract.json
+          test -s /tmp/graph.graphml
+          grep -q 'transformation-graph-adapter' /tmp/adapter-contract.json
       - name: Smoke test declarative project build
         run: |
           status=0

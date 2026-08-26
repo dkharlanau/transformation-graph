@@ -7,13 +7,10 @@ import sys
 from .adapters import graph_from_as_code
 from .agent_context import build_context_pack, write_context_pack
 from .composition import compose_adapter_documents
-from .conformance import (
-    evaluate_adapter_graph,
-    render_conformance_report,
-    should_fail_conformance,
-    write_conformance_report,
-)
+from .conformance import evaluate_adapter_graph, render_conformance_report, should_fail_conformance, write_conformance_report
+from .contracts import render_adapter_contract
 from .diffing import diff_with_impact, graph_diff
+from .graphml import write_graphml
 from .html_export import write_html
 from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
@@ -22,14 +19,7 @@ from .project import build_project
 from .review import build_review_report, write_review_report
 from .scorecard import build_scorecard, render_scorecard_report, write_scorecard_report
 from .site_export import build_site
-from .traceability import (
-    ROLE_PRESETS,
-    list_role_presets,
-    render_traceability_report,
-    role_traceability,
-    traceability_matrix,
-    write_traceability_report,
-)
+from .traceability import ROLE_PRESETS, list_role_presets, render_traceability_report, role_traceability, traceability_matrix, write_traceability_report
 
 
 def _json(value: object) -> None:
@@ -49,11 +39,13 @@ def build_parser() -> argparse.ArgumentParser:
     scorecard = sub.add_parser("scorecard", help="Generate a transparent governance coverage scorecard."); scorecard.add_argument("file"); scorecard.add_argument("--format", choices=["json", "markdown"], default="json"); scorecard.add_argument("--output"); scorecard.add_argument("--fail-below", type=float)
     policy = sub.add_parser("policy", help="Evaluate configurable governance policy packs."); policy.add_argument("file"); policy.add_argument("--pack", action="append", required=True, dest="packs"); policy.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
+    graphml = sub.add_parser("graphml", help="Export the canonical graph as standards-oriented GraphML."); graphml.add_argument("file"); graphml.add_argument("--output", required=True)
     html = sub.add_parser("html", help="Generate a dependency-free single-file HTML/SVG explorer."); html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
     site = sub.add_parser("site", help="Generate a portable static site bundle with explorer and machine-readable artifacts."); site.add_argument("file"); site.add_argument("--output", required=True); site.add_argument("--title"); site.add_argument("--base-url")
     trace = sub.add_parser("trace", help="Build shortest-path traceability between node types."); trace.add_argument("file"); trace.add_argument("--from-type", action="append", required=True, dest="source_types"); trace.add_argument("--to-type", action="append", required=True, dest="target_types"); trace.add_argument("--max-depth", type=int, default=4); trace.add_argument("--directed", action="store_true"); trace.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); trace.add_argument("--output")
     role_view = sub.add_parser("role-view", help="Generate a role-oriented traceability view."); role_view.add_argument("file"); role_view.add_argument("role", choices=sorted(ROLE_PRESETS)); role_view.add_argument("--max-depth", type=int, default=4); role_view.add_argument("--format", choices=["json", "markdown", "csv"], default="json"); role_view.add_argument("--output")
     sub.add_parser("roles", help="List built-in role-oriented traceability presets.")
+    adapter_contract = sub.add_parser("adapter-contract", help="Print the packaged versioned as-code adapter contract."); adapter_contract.add_argument("--format", choices=["yaml", "json"], default="yaml")
     import_csv = sub.add_parser("import-csv", help="Build a graph from node and edge CSV files."); import_csv.add_argument("--nodes", required=True); import_csv.add_argument("--edges", required=True); import_csv.add_argument("--project-id", required=True); import_csv.add_argument("--project-name", required=True); import_csv.add_argument("--description"); import_csv.add_argument("--output", required=True)
     import_excel = sub.add_parser("import-excel", help="Build a graph from an Excel workbook with Nodes and Edges sheets."); import_excel.add_argument("workbook"); import_excel.add_argument("--nodes-sheet", default="Nodes"); import_excel.add_argument("--edges-sheet", default="Edges"); import_excel.add_argument("--project-id", required=True); import_excel.add_argument("--project-name", required=True); import_excel.add_argument("--description"); import_excel.add_argument("--output", required=True)
     import_adapter = sub.add_parser("import-adapter", help="Normalize a Mapping/Interface/Process-as-Code document into the canonical graph."); import_adapter.add_argument("kind", choices=["mapping", "interface", "process"]); import_adapter.add_argument("input"); import_adapter.add_argument("--project-id"); import_adapter.add_argument("--project-name"); import_adapter.add_argument("--output", required=True)
@@ -85,6 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "roles": _json(list_role_presets()); return 0
+        if args.command == "adapter-contract": print(render_adapter_contract(args.format), end=""); return 0
         if args.command == "build-project":
             report = build_project(args.manifest, args.output_dir, base_url_override=args.base_url, force_site=args.force_site)
             _json({"written": args.output_dir, "passed": report["passed"], "score": report["governance"]["scorecard"]["score"], "outputs": report["outputs"]})
@@ -135,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
             return 6 if args.fail_below is not None and report["score"] < args.fail_below else 0
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
+        if args.command == "graphml": write_graphml(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "site": manifest = build_site(graph, args.output, args.title, args.base_url); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
         if args.command == "trace": report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
