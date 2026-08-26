@@ -37,15 +37,6 @@ jobs:
           transformation-graph adapter-contract --format json > /tmp/adapter-contract.json
           test -s /tmp/graph.graphml
           grep -q 'transformation-graph-adapter' /tmp/adapter-contract.json
-      - name: Self-test reusable adapter action
-        uses: dkharlanau/transformation-graph@main
-        with:
-          kind: mapping
-          input: conformance/adapter-v0.1/mapping.pass.yaml
-          fail-on: error
-          report-path: /tmp/action-conformance.json
-      - name: Verify reusable action output
-        run: grep -q '"passed": true' /tmp/action-conformance.json
       - name: Smoke test declarative project build
         run: |
           status=0
@@ -69,6 +60,8 @@ jobs:
           transformation-graph adapter-check mapping examples/adapters/mapping.yaml --fail-on error
           transformation-graph adapter-check interface examples/adapters/interface.yaml --fail-on error
           transformation-graph adapter-check process examples/adapters/process.yaml --fail-on error
+          transformation-graph adapter-check mapping conformance/adapter-v0.1/mapping.pass.yaml --format json --output /tmp/contract-kit-report.json --fail-on error
+          grep -q '"passed": true' /tmp/contract-kit-report.json
       - name: Smoke test graph diff and review
         run: |
           transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
