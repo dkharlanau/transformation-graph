@@ -1,0 +1,107 @@
+version: "0.1"
+
+project:
+  id: customer-master-migration
+  name: Customer Master Migration to SAP S/4HANA
+  description: >
+    Small but realistic transformation slice showing how process, systems,
+    data, interface, mapping, rules, requirements, tests, decisions, owners,
+    evidence, and change can be connected in one graph.
+
+nodes:
+  - id: process.customer-migration
+    type: process
+    title: Migrate customer master
+  - id: step.extract
+    type: process_step
+    title: Extract legacy customer master
+  - id: step.transform
+    type: process_step
+    title: Transform customer data
+  - id: step.load
+    type: process_step
+    title: Load business partner
+  - id: system.legacy-erp
+    type: system
+    title: Legacy SAP ERP
+    attributes: {product: SAP ERP}
+  - id: system.s4
+    type: system
+    title: SAP S/4HANA
+    attributes: {product: SAP S/4HANA}
+  - id: object.customer
+    type: business_object
+    title: Customer
+  - id: object.business-partner
+    type: business_object
+    title: Business Partner
+  - id: data.kna1
+    type: data_object
+    title: KNA1 customer general data
+    attributes: {table: KNA1}
+  - id: field.kunnr
+    type: field
+    title: Customer number
+    attributes: {source: KNA1-KUNNR}
+  - id: field.bp-id
+    type: field
+    title: Business Partner ID
+    attributes: {target: BusinessPartner-BusinessPartner}
+  - id: interface.customer-load
+    type: interface
+    title: Customer migration load interface
+    attributes: {protocol: file/API}
+  - id: mapping.customer-to-bp
+    type: mapping
+    title: Customer to Business Partner mapping
+  - id: rule.id-conversion
+    type: rule
+    title: Preserve customer number when target range allows
+    description: If the target number range permits external assignment, preserve the source customer number.
+  - id: requirement.traceability
+    type: requirement
+    title: Every migrated customer must be traceable to its source record
+  - id: test.customer-load
+    type: test
+    title: Customer migration reconciliation test
+    attributes: {expected: source and target business keys reconcile}
+  - id: change.bp-model
+    type: change
+    title: Customer model changes to Business Partner
+    description: S/4HANA target uses Business Partner as the leading object.
+  - id: decision.external-number
+    type: decision
+    title: Use external BP numbering for migrated customers
+  - id: owner.master-data
+    type: owner
+    title: Master Data Team
+  - id: evidence.mapping-workbook
+    type: evidence
+    title: Approved customer mapping workbook
+    attributes: {uri: evidence/customer-mapping.xlsx}
+
+edges:
+  - {from: process.customer-migration, to: step.extract, type: contains}
+  - {from: process.customer-migration, to: step.transform, type: contains}
+  - {from: process.customer-migration, to: step.load, type: contains}
+  - {from: step.extract, to: system.legacy-erp, type: runs_on}
+  - {from: step.extract, to: data.kna1, type: reads}
+  - {from: data.kna1, to: object.customer, type: represents}
+  - {from: data.kna1, to: field.kunnr, type: contains}
+  - {from: step.transform, to: mapping.customer-to-bp, type: uses}
+  - {from: mapping.customer-to-bp, to: field.kunnr, type: reads}
+  - {from: mapping.customer-to-bp, to: field.bp-id, type: writes}
+  - {from: mapping.customer-to-bp, to: rule.id-conversion, type: constrained_by}
+  - {from: mapping.customer-to-bp, to: evidence.mapping-workbook, type: evidenced_by}
+  - {from: step.load, to: interface.customer-load, type: uses}
+  - {from: interface.customer-load, to: system.s4, type: sends_to}
+  - {from: system.s4, to: object.business-partner, type: manages}
+  - {from: field.bp-id, to: object.business-partner, type: belongs_to}
+  - {from: requirement.traceability, to: mapping.customer-to-bp, type: constrains}
+  - {from: requirement.traceability, to: test.customer-load, type: covered_by}
+  - {from: test.customer-load, to: interface.customer-load, type: validates}
+  - {from: change.bp-model, to: object.customer, type: affects}
+  - {from: change.bp-model, to: object.business-partner, type: introduces}
+  - {from: change.bp-model, to: decision.external-number, type: governed_by}
+  - {from: decision.external-number, to: rule.id-conversion, type: implements}
+  - {from: decision.external-number, to: owner.master-data, type: owned_by}

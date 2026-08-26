@@ -1,21 +1,55 @@
 # Roadmap
 
-## Phase 1 — Core model
+## v0.1 — Executable core — implemented
 
-Define the canonical structured representation and its schema.
+- [x] Canonical project graph format
+- [x] JSON Schema
+- [x] YAML/JSON loader
+- [x] Deterministic semantic validation
+- [x] SAP S/4HANA migration example
+- [x] Graph statistics
+- [x] Shortest dependency-path query
+- [x] Bounded context extraction
+- [x] Unit tests
+- [x] GitHub Actions CI
 
-## Phase 2 — Validation
+## v0.2 — Quality and impact analysis
 
-Add deterministic validation rules and test fixtures.
+- [ ] Orphan detection
+- [ ] Coverage checks: changes without tests, mappings without evidence, objects without owners
+- [ ] Configurable required-relation policies
+- [ ] Impact traversal by relation/type
+- [ ] Human-readable validation report
 
-## Phase 3 — Visualization
+## v0.3 — Import and composition
 
-Add human-readable visual views and generated documentation.
+- [ ] CSV importer
+- [ ] Excel importer
+- [ ] Compose multiple graph files into one project graph
+- [ ] Adapters for Mapping as Code
+- [ ] Adapters for Interface as Code
+- [ ] Adapters for Process as Code
 
-## Phase 4 — Interoperability
+## v0.4 — Generated views
 
-Add import/export to relevant open standards and common project formats.
+- [ ] Mermaid export
+- [ ] Static HTML explorer
+- [ ] Node detail pages
+- [ ] Impact and traceability views
+- [ ] GitHub Pages publishing workflow
 
-## Phase 5 — Automation
+## v0.5 — Change intelligence
 
-Add CLI, CI integration, and machine-facing outputs where useful.
+- [ ] Graph diff between revisions
+- [ ] Changed-node impact report
+- [ ] CI annotations for broken dependencies
+- [ ] Evidence freshness metadata
+- [ ] Baseline/snapshot support
+
+## v0.6 — Agent interoperability
+
+- [ ] Stable JSON context-pack format
+- [ ] MCP-friendly read resources
+- [ ] Query presets for transformation roles
+- [ ] Bounded context policies
+- [ ] Provenance/evidence pointers in agent output

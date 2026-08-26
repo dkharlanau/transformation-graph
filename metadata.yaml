@@ -10,13 +10,25 @@ portfolio:
   sap_proof: 10
   brand_value: 10
 
-status: planning
+status: mvp
 
 implementation:
   repository_created: true
-  implementation_status: not-started
+  implementation_status: executable-mvp
+  model_version: "0.1"
+  package_version: "0.1.0"
   codex_fit: 5/5
   sap_access_required: false
+  ci: true
+  tests: true
+
+capabilities:
+  - yaml-json-model
+  - semantic-validation
+  - dependency-paths
+  - bounded-context
+  - graph-statistics
+  - json-schema
 
 principles:
   - versionable
@@ -26,6 +38,7 @@ principles:
   - visual
   - git-friendly
   - interoperable
+  - bounded-context
 
 primary_users:
   - SAP consultants
