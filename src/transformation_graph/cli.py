@@ -10,6 +10,7 @@ from .composition import compose_adapter_documents
 from .conformance import evaluate_adapter_graph, render_conformance_report, should_fail_conformance, write_conformance_report
 from .contracts import render_adapter_contract
 from .diffing import diff_with_impact, graph_diff
+from .governance_views import build_governance_view, render_governance_view, write_governance_view
 from .graphml import write_graphml
 from .html_export import write_html
 from .importers import graph_from_csv, graph_from_excel, write_graph
@@ -19,6 +20,7 @@ from .project import build_project
 from .review import build_review_report, write_review_report
 from .scorecard import build_scorecard, render_scorecard_report, write_scorecard_report
 from .site_export import build_site
+from .site_extensions import augment_site
 from .traceability import ROLE_PRESETS, list_role_presets, render_traceability_report, role_traceability, traceability_matrix, write_traceability_report
 
 
@@ -37,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     impact = sub.add_parser("impact", help="Traverse impacted nodes around a root."); impact.add_argument("file"); impact.add_argument("node"); impact.add_argument("--depth", type=int, default=2); impact.add_argument("--direction", choices=["in", "out", "both"], default="both"); impact.add_argument("--relation", action="append", dest="relations")
     quality = sub.add_parser("quality", help="Run built-in graph quality checks."); quality.add_argument("file"); quality.add_argument("--strict", action="store_true")
     scorecard = sub.add_parser("scorecard", help="Generate a transparent governance coverage scorecard."); scorecard.add_argument("file"); scorecard.add_argument("--format", choices=["json", "markdown"], default="json"); scorecard.add_argument("--output"); scorecard.add_argument("--fail-below", type=float)
+    governance_view = sub.add_parser("governance-view", help="Generate ownership, test-coverage, or change-readiness review view."); governance_view.add_argument("file"); governance_view.add_argument("view", choices=["ownership", "test-coverage", "change-readiness"]); governance_view.add_argument("--format", choices=["json", "html"], default="json"); governance_view.add_argument("--output")
     policy = sub.add_parser("policy", help="Evaluate configurable governance policy packs."); policy.add_argument("file"); policy.add_argument("--pack", action="append", required=True, dest="packs"); policy.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
     graphml = sub.add_parser("graphml", help="Export the canonical graph as standards-oriented GraphML."); graphml.add_argument("file"); graphml.add_argument("--output", required=True)
@@ -126,11 +129,17 @@ def main(argv: list[str] | None = None) -> int:
             if args.output: write_scorecard_report(report, args.output, args.format); _json({"written": args.output, "format": args.format, "score": report["score"], "gaps": report["summary"]["gaps"]})
             else: print(render_scorecard_report(report, args.format), end="")
             return 6 if args.fail_below is not None and report["score"] < args.fail_below else 0
+        if args.command == "governance-view":
+            report = build_governance_view(graph, args.view)
+            if args.output: write_governance_view(report, args.output, args.format); _json({"written": args.output, "view": args.view, "format": args.format, "summary": report["summary"]})
+            else: print(render_governance_view(report, args.format), end="")
+            return 0
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
         if args.command == "graphml": write_graphml(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
-        if args.command == "site": manifest = build_site(graph, args.output, args.title, args.base_url); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
+        if args.command == "site":
+            manifest = augment_site(graph, args.output, build_site(graph, args.output, args.title, args.base_url)); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
         if args.command == "trace": report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
         if args.command == "role-view": report = role_traceability(graph, args.role, args.max_depth); _emit_trace_report(report, args.format, args.output); return 0
     except (OSError, GraphValidationError, ValueError, TypeError) as exc:

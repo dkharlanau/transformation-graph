@@ -23,8 +23,12 @@ jobs:
         run: transformation-graph validate examples/sap-s4-customer-migration.yaml
       - name: Quality gate canonical example
         run: transformation-graph quality examples/sap-s4-customer-migration.yaml --strict
-      - name: Governance scorecard
-        run: transformation-graph scorecard examples/sap-s4-customer-migration.yaml --format markdown --output /tmp/scorecard.md --fail-below 50
+      - name: Governance scorecard and focused views
+        run: |
+          transformation-graph scorecard examples/sap-s4-customer-migration.yaml --format markdown --output /tmp/scorecard.md --fail-below 50
+          transformation-graph governance-view examples/sap-s4-customer-migration.yaml ownership --format json --output /tmp/ownership.json
+          transformation-graph governance-view examples/sap-s4-customer-migration.yaml test-coverage --format json --output /tmp/test-coverage.json
+          transformation-graph governance-view examples/sap-s4-customer-migration.yaml change-readiness --format html --output /tmp/change-readiness.html
       - name: Policy gate canonical example
         run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
       - name: Smoke test GraphML and adapter contract
@@ -43,9 +47,10 @@ jobs:
             exit "$status"
           fi
           transformation-graph validate /tmp/project-build/graph.yaml
-          test -s /tmp/project-build/build-report.json
           test -s /tmp/project-build/site/index.html
-          test -s /tmp/project-build/site/scorecard.json
+          test -s /tmp/project-build/site/graph.graphml
+          test -s /tmp/project-build/site/governance.html
+          test -s /tmp/project-build/site/views/ownership.json
       - name: Smoke test traceability and role views
         run: |
           transformation-graph trace examples/sap-s4-customer-migration.yaml --from-type mapping --to-type field --max-depth 2 --format markdown --output /tmp/traceability.md
@@ -62,7 +67,7 @@ jobs:
       - name: Smoke test agent and MCP contracts
         run: |
           transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json
-          python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 7"
+          python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 8"
       - name: Run tests
         run: pytest -q
       - name: Build wheel and source distribution
