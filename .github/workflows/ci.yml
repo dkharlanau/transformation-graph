@@ -23,12 +23,24 @@ jobs:
         run: transformation-graph validate examples/sap-s4-customer-migration.yaml
       - name: Quality gate canonical example
         run: transformation-graph quality examples/sap-s4-customer-migration.yaml --strict
+      - name: Policy gate canonical example
+        run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
       - name: Smoke test CSV import
         run: transformation-graph import-csv --nodes examples/csv/nodes.csv --edges examples/csv/edges.csv --project-id csv-ci --project-name "CSV CI" --output /tmp/csv-ci.yaml
       - name: Validate imported graph
         run: transformation-graph validate /tmp/csv-ci.yaml
+      - name: Smoke test as-code adapters
+        run: |
+          transformation-graph import-adapter mapping examples/adapters/mapping.yaml --output /tmp/mapping.yaml
+          transformation-graph import-adapter interface examples/adapters/interface.yaml --output /tmp/interface.yaml
+          transformation-graph import-adapter process examples/adapters/process.yaml --output /tmp/process.yaml
+          transformation-graph validate /tmp/mapping.yaml
+          transformation-graph validate /tmp/interface.yaml
+          transformation-graph validate /tmp/process.yaml
       - name: Smoke test graph diff
         run: transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
+      - name: Smoke test PR review report
+        run: transformation-graph review examples/change/before.yaml examples/change/after.yaml --impact-depth 1 --policy policies/change-readiness.yaml --output /tmp/review.md && test -s /tmp/review.md
       - name: Smoke test HTML explorer
         run: transformation-graph html examples/sap-s4-customer-migration.yaml --output /tmp/transformation-graph.html && test -s /tmp/transformation-graph.html
       - name: Smoke test agent context pack
