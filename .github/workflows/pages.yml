@@ -1,18 +1,25 @@
-name: Pages
+name: Transformation Graph Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -23,26 +30,21 @@ jobs:
           cache: pip
       - name: Install
         run: python -m pip install -e .
-      - name: Build governed project site
-        run: transformation-graph build-project examples/project/transformation-project.yaml --output-dir build --site --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+      - name: Build governed reference project
+        run: transformation-graph build-project examples/project/transformation-project.yaml --output-dir build --site --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/explorer/"
+      - name: Stage product home and explorer
+        run: |
+          mkdir -p build/product-site/explorer
+          cp -R build/site/. build/product-site/explorer/
+          cp docs/product.html build/product-site/index.html
+          cp docs/agent-manifest.json build/product-site/agent-manifest.json
+          touch build/product-site/.nojekyll
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: build/site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
+          path: build/product-site
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
