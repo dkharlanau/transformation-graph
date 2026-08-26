@@ -5,7 +5,7 @@ process:
   owner: data_governance_lead
   start: request
   trigger: Approved commercial need for a new customer
-  outcome: Customer is available in the target system
+  outcome: Customer is available and validated in the target system
 roles:
   - {id: data_governance_lead, name: Data Governance Lead}
 systems:
@@ -39,5 +39,12 @@ steps:
     type: service_task
     system: mdg
     interfaces: [customer_replication]
+    transitions: [{to: validate}]
+  - id: validate
+    name: Validate customer in S/4HANA
+    type: user_task
+    actor: data_governance_lead
+    system: s4
+    objects: [business_partner]
     transitions: [{to: complete}]
   - {id: complete, name: Customer created, type: end}
