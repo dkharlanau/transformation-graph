@@ -2,71 +2,52 @@ name: Transformation Graph
 repository: transformation-graph
 owner: dkharlanau
 visibility: public
-status: alpha-v0.13
+status: alpha-v0.15
 implementation:
-  repository_created: true
   implementation_status: executable-alpha
   model_version: "0.1"
-  feature_version: "0.13"
-  package_version: "0.13.0"
-  codex_fit: 5/5
+  project_manifest_version: "0.1"
+  feature_version: "0.15"
+  package_version: "0.15.0"
   sap_access_required: false
   ci: true
   tests: true
   package_build: true
   release_workflow: true
 capabilities:
-  - yaml-json-model
+  - canonical-enterprise-graph
   - semantic-validation
-  - dependency-paths
-  - bounded-context
-  - graph-statistics
-  - impact-analysis
-  - quality-checks
+  - dependency-and-impact-analysis
+  - governance-scorecard
   - policy-packs
   - traceability-matrix
   - role-oriented-views
-  - mermaid-export
-  - html-explorer
-  - svg-graph-canvas
-  - static-site-bundle
-  - llms-index
-  - sitemap
-  - csv-import
-  - excel-import
-  - mapping-as-code-adapter
-  - interface-as-code-adapter
-  - process-as-code-adapter
+  - csv-excel-import
+  - mapping-interface-process-adapters
   - adapter-conformance
   - reconciled-composition
-  - graph-diff
-  - change-impact
-  - pr-review-report
-  - quality-policy-delta
+  - semantic-diff-and-pr-review
+  - html-svg-explorer
+  - portable-static-site
+  - llms-index
+  - declarative-project-manifest
+  - governed-project-build
   - agent-context-pack
-  - context-pack-schema
   - mcp-v2-server
-  - mcp-resources
-  - mcp-tools
   - pages-workflow
   - release-build
-  - json-schema
 principles:
+  - deterministic-first
   - versionable
   - portable
   - machine-readable
-  - deterministic-first
-  - visual
   - git-friendly
-  - interoperable
   - bounded-context
   - fail-loud-on-conflict
 primary_users:
   - SAP consultants
   - enterprise architects
-  - data consultants
-  - integration consultants
-  - test leads
-  - cutover leads
+  - data and integration consultants
+  - test and cutover leads
   - business analysts
   - transformation teams

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transformation-graph"
-version = "0.14.0"
+version = "0.15.0"
 description = "Git-native enterprise transformation graphs for traceability, impact analysis, governance, and agent context."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -23,14 +23,14 @@ jobs:
           cache: pip
       - name: Install
         run: python -m pip install -e .
-      - name: Build static graph site
-        run: transformation-graph site examples/sap-s4-customer-migration.yaml --output _site --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+      - name: Build governed project site
+        run: transformation-graph build-project examples/project/transformation-project.yaml --output-dir build --site --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: _site
+          path: build/site
 
   deploy:
     needs: build

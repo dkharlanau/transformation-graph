@@ -18,6 +18,7 @@ from .html_export import write_html
 from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
 from .policy import evaluate_policy_files, should_fail
+from .project import build_project
 from .review import build_review_report, write_review_report
 from .scorecard import build_scorecard, render_scorecard_report, write_scorecard_report
 from .site_export import build_site
@@ -36,10 +37,7 @@ def _json(value: object) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="transformation-graph",
-        description="Validate, compose, compare, govern, visualize, import, publish, and query Git-native enterprise transformation graphs.",
-    )
+    parser = argparse.ArgumentParser(prog="transformation-graph", description="Validate, compose, compare, govern, visualize, import, publish, and query Git-native enterprise transformation graphs.")
     sub = parser.add_subparsers(dest="command", required=True)
     validate = sub.add_parser("validate", help="Validate a YAML or JSON graph."); validate.add_argument("file")
     stats = sub.add_parser("stats", help="Show graph statistics."); stats.add_argument("file")
@@ -62,6 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
     adapter_check = sub.add_parser("adapter-check", help="Normalize and semantically conformance-check an as-code document."); adapter_check.add_argument("kind", choices=["mapping", "interface", "process"]); adapter_check.add_argument("input"); adapter_check.add_argument("--format", choices=["json", "markdown"], default="json"); adapter_check.add_argument("--output"); adapter_check.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     compose_adapters = sub.add_parser("compose-adapters", help="Normalize, conformance-check, and reconcile multiple as-code documents."); compose_adapters.add_argument("--mapping", action="append", default=[]); compose_adapters.add_argument("--interface", action="append", default=[]); compose_adapters.add_argument("--process", action="append", default=[]); compose_adapters.add_argument("--project-id", required=True); compose_adapters.add_argument("--project-name", required=True); compose_adapters.add_argument("--description"); compose_adapters.add_argument("--fail-on", choices=["error", "warning", "never"], default="error"); compose_adapters.add_argument("--output", required=True)
     compose = sub.add_parser("compose", help="Compose multiple canonical graph slices strictly."); compose.add_argument("files", nargs="+"); compose.add_argument("--project-id", required=True); compose.add_argument("--project-name", required=True); compose.add_argument("--description"); compose.add_argument("--output", required=True)
+    project_build = sub.add_parser("build-project", help="Build graph, governance reports, and optional site from one project manifest."); project_build.add_argument("manifest"); project_build.add_argument("--output-dir", required=True); project_build.add_argument("--base-url"); project_build.add_argument("--site", dest="force_site", action="store_true", default=None); project_build.add_argument("--no-site", dest="force_site", action="store_false")
     diff = sub.add_parser("diff", help="Compare two graph snapshots and optionally calculate neighboring impact."); diff.add_argument("before"); diff.add_argument("after"); diff.add_argument("--impact-depth", type=int, default=0)
     review = sub.add_parser("review", help="Generate a Markdown or JSON change-review report for CI/PR use."); review.add_argument("before"); review.add_argument("after"); review.add_argument("--impact-depth", type=int, default=1); review.add_argument("--policy", action="append", dest="policies"); review.add_argument("--format", choices=["markdown", "json"], default="markdown"); review.add_argument("--output", required=True)
     mcp = sub.add_parser("mcp", help="Run an MCP v2 server backed by a graph file."); mcp.add_argument("file"); mcp.add_argument("--transport", choices=["stdio", "streamable-http"], default="stdio"); mcp.add_argument("--host", default="127.0.0.1"); mcp.add_argument("--port", type=int, default=8000)
@@ -72,22 +71,24 @@ def _emit_trace_report(report: dict, format: str, output: str | None) -> None:
     if output:
         write_traceability_report(report, output, format)  # type: ignore[arg-type]
         _json({"written": output, "format": format, "paths": report["summary"]["paths"]})
-    else:
-        print(render_traceability_report(report, format), end="")  # type: ignore[arg-type]
+    else: print(render_traceability_report(report, format), end="")  # type: ignore[arg-type]
 
 
 def _emit_conformance(report: dict, format: str, output: str | None) -> None:
     if output:
         write_conformance_report(report, output, format)  # type: ignore[arg-type]
         _json({"written": output, "format": format, **report["summary"]})
-    else:
-        print(render_conformance_report(report, format), end="")  # type: ignore[arg-type]
+    else: print(render_conformance_report(report, format), end="")  # type: ignore[arg-type]
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.command == "roles": _json(list_role_presets()); return 0
+        if args.command == "build-project":
+            report = build_project(args.manifest, args.output_dir, base_url_override=args.base_url, force_site=args.force_site)
+            _json({"written": args.output_dir, "passed": report["passed"], "score": report["governance"]["scorecard"]["score"], "outputs": report["outputs"]})
+            return 0 if report["passed"] else 7
         if args.command == "import-csv":
             graph = graph_from_csv(args.nodes, args.edges, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "import-excel":
@@ -106,8 +107,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "review":
             before = Graph.from_file(args.before); after = Graph.from_file(args.after); report = build_review_report(before, after, args.impact_depth, args.policies or []); write_review_report(report, args.output, args.format); _json({"written": args.output, "format": args.format, "changed_roots": len(report["changed_roots"]), "impacted_nodes": len(report["impact"]["nodes"]), "attention": report["attention_summary"]}); return 0
         if args.command == "mcp":
-            try:
-                from .mcp_server import run_mcp_server
+            try: from .mcp_server import run_mcp_server
             except ModuleNotFoundError as exc:
                 if exc.name == "mcp": print('ERROR: MCP support is optional. Install with: pip install -e ".[mcp]"', file=sys.stderr); return 1
                 raise
@@ -136,16 +136,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
-        if args.command == "site":
-            manifest = build_site(graph, args.output, args.title, args.base_url); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
-        if args.command == "trace":
-            report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
-        if args.command == "role-view":
-            report = role_traceability(graph, args.role, args.max_depth); _emit_trace_report(report, args.format, args.output); return 0
+        if args.command == "site": manifest = build_site(graph, args.output, args.title, args.base_url); _json({"written": args.output, "artifacts": manifest["artifacts"], **graph.stats()}); return 0
+        if args.command == "trace": report = traceability_matrix(graph, set(args.source_types), set(args.target_types), args.max_depth, undirected=not args.directed); _emit_trace_report(report, args.format, args.output); return 0
+        if args.command == "role-view": report = role_traceability(graph, args.role, args.max_depth); _emit_trace_report(report, args.format, args.output); return 0
     except (OSError, GraphValidationError, ValueError, TypeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr); return 1
     return 1
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == "__main__": raise SystemExit(main())

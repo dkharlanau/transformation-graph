@@ -3,4 +3,4 @@
 from .model import Graph, GraphValidationError
 
 __all__ = ["Graph", "GraphValidationError"]
-__version__ = "0.14.0"
+__version__ = "0.15.0"

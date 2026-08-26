@@ -2,7 +2,18 @@
 
 All notable product changes are recorded here. Versions before the first public tag represent repository development milestones.
 
-## 0.13.0 — Unreleased
+## 0.15.0 — Unreleased
+
+- Added declarative project manifests with relative source resolution.
+- Added one-command normalize → conformance → reconcile → policy → scorecard → site build flow.
+- Added governed build reports and self-dogfooded the manifest in CI and Pages.
+
+## 0.14.0
+
+- Added transparent weighted governance scorecards with explicit numerators, denominators, paths, and gaps.
+- Added score thresholds to CI, MCP access, and scorecard artifacts in the static site.
+
+## 0.13.0
 
 - Added build verification for wheel and source distributions.
 - Added tag-driven GitHub Release workflow with SHA-256 checksums.
@@ -15,29 +26,12 @@ All notable product changes are recorded here. Versions before the first public 
 
 ## 0.11.0
 
-- Added semantic adapter conformance checks for Mapping as Code, Interface as Code, and Process as Code.
-- Added reconciled composition for compatible same-ID nodes across as-code artifacts.
+- Added semantic adapter conformance checks and reconciled composition.
 
 ## 0.10.0
 
-- Added deterministic traceability matrix export in JSON, Markdown, and CSV.
-- Added architect, integration, data, test, and cutover role views.
-- Added traceability and role-view MCP tools.
+- Added deterministic traceability matrix export and architect/integration/data/test/cutover role views.
 
-## 0.9.0
+## 0.1.0–0.9.0
 
-- Added configurable governance policy packs and CI thresholds.
-- Added deterministic change-review reports with impact and quality/policy deltas.
-- Added interactive SVG dependency canvas and PR review workflow.
-
-## 0.8.0
-
-- Added Excel ingestion and Mapping/Interface/Process-as-Code adapters.
-
-## 0.7.0
-
-- Added MCP v2 server with stdio and Streamable HTTP transports.
-
-## 0.1.0–0.6.0
-
-- Established the canonical graph model, validation, quality checks, impact traversal, import/composition, semantic diff, HTML explorer, and bounded agent context contract.
+- Established the canonical graph, validation, ingestion, impact/change intelligence, visualization, governance policies, bounded agent context, and MCP adapter.

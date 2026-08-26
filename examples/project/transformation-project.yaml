@@ -1,0 +1,21 @@
+version: "0.1"
+project:
+  id: customer-domain-reference
+  name: Customer Domain Reference Transformation
+  description: >
+    Reference project assembled from process, interface, and mapping as-code artifacts.
+sources:
+  adapters:
+    - {kind: mapping, path: ../adapters/mapping.yaml}
+    - {kind: interface, path: ../adapters/interface.yaml}
+    - {kind: process, path: ../adapters/process.yaml}
+  graphs: []
+governance:
+  conformance_fail_on: error
+  policies:
+    - ../../policies/enterprise-baseline.yaml
+  policy_fail_on: error
+  score_fail_below: 70
+publish:
+  site: true
+  title: Customer Domain Transformation Graph
