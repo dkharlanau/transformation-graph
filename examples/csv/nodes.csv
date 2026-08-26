@@ -1,0 +1,5 @@
+id,type,title,description,tags,attributes_json
+system.source,system,Source ERP,,sap;source,"{""product"": ""SAP ERP""}"
+system.target,system,Target S/4HANA,,sap;target,"{""product"": ""SAP S/4HANA""}"
+interface.customer,interface,Customer replication interface,,integration,"{""protocol"": ""IDoc""}"
+test.replication,test,Replication smoke test,,test,

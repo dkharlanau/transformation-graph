@@ -23,5 +23,9 @@ jobs:
         run: transformation-graph validate examples/sap-s4-customer-migration.yaml
       - name: Quality gate canonical example
         run: transformation-graph quality examples/sap-s4-customer-migration.yaml --strict
+      - name: Smoke test CSV import
+        run: transformation-graph import-csv --nodes examples/csv/nodes.csv --edges examples/csv/edges.csv --project-id csv-ci --project-name "CSV CI" --output /tmp/csv-ci.yaml
+      - name: Validate imported graph
+        run: transformation-graph validate /tmp/csv-ci.yaml
       - name: Run tests
         run: pytest -q

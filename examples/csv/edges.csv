@@ -1,0 +1,4 @@
+from,to,type,label,attributes_json
+system.source,interface.customer,sends_via,,
+interface.customer,system.target,sends_to,,
+test.replication,interface.customer,validates,,

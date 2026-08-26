@@ -4,18 +4,17 @@
 
 Transformation Graph links processes, systems, business objects, data, fields, interfaces, mappings, rules, requirements, tests, changes, decisions, owners, and evidence in one project-scoped graph.
 
-Instead of asking people to reconstruct dependencies from PowerPoint, Excel, Jira, architecture diagrams, and tribal knowledge, the project gives those dependencies a small machine-readable representation that can be validated, queried, versioned, and handed to humans or AI agents.
-
 ## What is executable today
 
 - canonical YAML/JSON graph model and JSON Schema
 - semantic validation with dangling-reference and duplicate detection
 - realistic SAP S/4HANA customer migration example
-- shortest dependency-path query
-- bounded context extraction for AI/automation
+- shortest dependency-path and bounded context queries
 - impact traversal with direction/relation filters
 - quality checks for orphan/coverage/evidence/ownership gaps
 - Mermaid export for full or focused graph views
+- generic CSV node/edge import
+- deterministic composition of multiple graph slices
 - pytest suite and GitHub Actions quality gate
 
 No SAP system access is required.
@@ -29,6 +28,13 @@ python -m pip install -e ".[dev]"
 transformation-graph validate examples/sap-s4-customer-migration.yaml
 transformation-graph quality examples/sap-s4-customer-migration.yaml
 transformation-graph impact examples/sap-s4-customer-migration.yaml change.bp-model --depth 2
+```
+
+Import an existing tabular inventory and compose slices:
+
+```bash
+transformation-graph import-csv --nodes nodes.csv --edges edges.csv --project-id demo --project-name "Demo" --output demo.yaml
+transformation-graph compose process.yaml data.yaml interfaces.yaml --project-id program --project-name "Program Graph" --output program.yaml
 ```
 
 Generate a focused Mermaid diagram:
@@ -60,25 +66,11 @@ graph LR
   M --> E[Evidence]
 ```
 
-See [docs/model.md](docs/model.md), [docs/queries.md](docs/queries.md), and [docs/quality.md](docs/quality.md).
+See [docs/model.md](docs/model.md), [docs/queries.md](docs/queries.md), [docs/quality.md](docs/quality.md), and [docs/importing.md](docs/importing.md).
 
 ## Agent-ready by design
 
-The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded context subgraph, let the model reason over explicit relationships, and keep deterministic validation outside the model. `transformation-graph context` implements that first bounded context pattern.
-
-## Design principles
-
-- versionable and portable
-- machine-readable and deterministic-first
-- visual where useful
-- Git-friendly
-- vendor-neutral where practical
-- interoperable with enterprise tools
-- bounded context over giant document dumps
-
-## Next
-
-The strongest next increments are configurable policy packs, CSV/Excel import, static HTML exploration, graph diff between Git revisions, adapters for the related As Code repositories, and MCP-friendly context resources. Track sequencing in [ROADMAP.md](ROADMAP.md).
+The useful AI pattern is not to send the whole project to a model. Resolve the node or change in question, traverse only relevant dependencies, emit a bounded context subgraph, let the model reason over explicit relationships, and keep deterministic validation outside the model.
 
 ## Related projects
 
@@ -94,4 +86,4 @@ The strongest next increments are configurable policy packs, CSV/Excel import, s
 
 ## Status
 
-**MVP / v0.2.** The canonical model, validator, path/context/impact queries, quality checks, Mermaid export, example, tests, and CI are implemented. The model is intentionally small and expected to evolve through real transformation cases.
+**MVP / v0.3.** The repository is executable and evolving through real transformation use cases.
