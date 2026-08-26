@@ -17,6 +17,7 @@ def test_mcp_server_registers_bounded_resources_and_tools():
         "find_path",
         "analyze_impact",
         "graph_quality",
+        "governance_scorecard",
         "traceability",
         "role_view",
     }

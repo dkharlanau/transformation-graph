@@ -21,6 +21,9 @@ def test_site_bundle_contains_human_and_machine_artifacts(tmp_path: Path):
         "graph.json",
         "catalog.json",
         "manifest.json",
+        "scorecard.html",
+        "scorecard.json",
+        "scorecard.md",
         "llms.txt",
         "robots.txt",
         "sitemap.xml",
@@ -34,7 +37,11 @@ def test_site_bundle_contains_human_and_machine_artifacts(tmp_path: Path):
         assert (site / path).exists(), path
 
     assert manifest["format"] == "transformation-graph-site"
+    assert manifest["version"] == "0.2"
+    assert 0 <= manifest["score"] <= 100
     assert "mapping.customer-to-bp" in (site / "graph.json").read_text(encoding="utf-8")
     assert "Role-oriented deterministic traceability" in (site / "llms.txt").read_text(encoding="utf-8")
+    assert "Governance score" in (site / "llms.txt").read_text(encoding="utf-8")
     assert 'rel="canonical"' in (site / "index.html").read_text(encoding="utf-8")
+    assert "Governance scorecard" in (site / "index.html").read_text(encoding="utf-8")
     assert "<svg" in (site / "explorer.html").read_text(encoding="utf-8")

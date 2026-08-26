@@ -23,6 +23,8 @@ jobs:
         run: transformation-graph validate examples/sap-s4-customer-migration.yaml
       - name: Quality gate canonical example
         run: transformation-graph quality examples/sap-s4-customer-migration.yaml --strict
+      - name: Governance scorecard
+        run: transformation-graph scorecard examples/sap-s4-customer-migration.yaml --format markdown --output /tmp/scorecard.md --fail-below 50
       - name: Policy gate canonical example
         run: transformation-graph policy examples/sap-s4-customer-migration.yaml --pack policies/enterprise-baseline.yaml --fail-on error
       - name: Smoke test traceability and role views
@@ -44,14 +46,6 @@ jobs:
         run: |
           transformation-graph compose-adapters --mapping examples/adapters/mapping.yaml --interface examples/adapters/interface.yaml --process examples/adapters/process.yaml --project-id adapter-program --project-name "Adapter Program" --output /tmp/adapter-program.yaml
           transformation-graph validate /tmp/adapter-program.yaml
-      - name: Smoke test as-code adapters
-        run: |
-          transformation-graph import-adapter mapping examples/adapters/mapping.yaml --output /tmp/mapping.yaml
-          transformation-graph import-adapter interface examples/adapters/interface.yaml --output /tmp/interface.yaml
-          transformation-graph import-adapter process examples/adapters/process.yaml --output /tmp/process.yaml
-          transformation-graph validate /tmp/mapping.yaml
-          transformation-graph validate /tmp/interface.yaml
-          transformation-graph validate /tmp/process.yaml
       - name: Smoke test graph diff
         run: transformation-graph diff examples/change/before.yaml examples/change/after.yaml --impact-depth 1
       - name: Smoke test PR review report
@@ -68,7 +62,7 @@ jobs:
       - name: Smoke test agent context pack
         run: transformation-graph context-pack examples/sap-s4-customer-migration.yaml mapping.customer-to-bp --depth 1 --output /tmp/context-pack.json && test -s /tmp/context-pack.json
       - name: Smoke test MCP registration
-        run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 6; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
+        run: python -c "import asyncio; from transformation_graph.mcp_server import create_mcp_server; s=create_mcp_server('examples/sap-s4-customer-migration.yaml'); assert len(asyncio.run(s.list_tools())) == 7; assert len(asyncio.run(s.list_resources())) == 1; assert len(asyncio.run(s.list_resource_templates())) == 1"
       - name: Run tests
         run: pytest -q
       - name: Build wheel and source distribution

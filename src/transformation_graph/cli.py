@@ -19,6 +19,7 @@ from .importers import graph_from_csv, graph_from_excel, write_graph
 from .model import Graph, GraphValidationError
 from .policy import evaluate_policy_files, should_fail
 from .review import build_review_report, write_review_report
+from .scorecard import build_scorecard, render_scorecard_report, write_scorecard_report
 from .site_export import build_site
 from .traceability import (
     ROLE_PRESETS,
@@ -47,6 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     context_pack = sub.add_parser("context-pack", help="Emit a stable agent-ready bounded context packet."); context_pack.add_argument("file"); context_pack.add_argument("node"); context_pack.add_argument("--depth", type=int, default=1); context_pack.add_argument("--output")
     impact = sub.add_parser("impact", help="Traverse impacted nodes around a root."); impact.add_argument("file"); impact.add_argument("node"); impact.add_argument("--depth", type=int, default=2); impact.add_argument("--direction", choices=["in", "out", "both"], default="both"); impact.add_argument("--relation", action="append", dest="relations")
     quality = sub.add_parser("quality", help="Run built-in graph quality checks."); quality.add_argument("file"); quality.add_argument("--strict", action="store_true")
+    scorecard = sub.add_parser("scorecard", help="Generate a transparent governance coverage scorecard."); scorecard.add_argument("file"); scorecard.add_argument("--format", choices=["json", "markdown"], default="json"); scorecard.add_argument("--output"); scorecard.add_argument("--fail-below", type=float)
     policy = sub.add_parser("policy", help="Evaluate configurable governance policy packs."); policy.add_argument("file"); policy.add_argument("--pack", action="append", required=True, dest="packs"); policy.add_argument("--fail-on", choices=["error", "warning", "never"], default="error")
     mermaid = sub.add_parser("mermaid", help="Export graph or focused subgraph as Mermaid."); mermaid.add_argument("file"); mermaid.add_argument("--focus"); mermaid.add_argument("--depth", type=int, default=1)
     html = sub.add_parser("html", help="Generate a dependency-free single-file HTML/SVG explorer."); html.add_argument("file"); html.add_argument("--output", required=True); html.add_argument("--title")
@@ -85,8 +87,7 @@ def _emit_conformance(report: dict, format: str, output: str | None) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        if args.command == "roles":
-            _json(list_role_presets()); return 0
+        if args.command == "roles": _json(list_role_presets()); return 0
         if args.command == "import-csv":
             graph = graph_from_csv(args.nodes, args.edges, args.project_id, args.project_name, args.description); write_graph(graph, args.output); _json({"written": args.output, **graph.stats()}); return 0
         if args.command == "import-excel":
@@ -127,6 +128,11 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.command == "impact": _json(graph.impact(args.node, args.depth, args.direction, set(args.relations) if args.relations else None)); return 0
         if args.command == "quality": report = graph.quality(); _json(report); return 3 if args.strict and not report["passed"] else 0
+        if args.command == "scorecard":
+            report = build_scorecard(graph)
+            if args.output: write_scorecard_report(report, args.output, args.format); _json({"written": args.output, "format": args.format, "score": report["score"], "gaps": report["summary"]["gaps"]})
+            else: print(render_scorecard_report(report, args.format), end="")
+            return 6 if args.fail_below is not None and report["score"] < args.fail_below else 0
         if args.command == "policy": report = evaluate_policy_files(graph, args.packs); _json(report); return 4 if should_fail(report, args.fail_on) else 0
         if args.command == "mermaid": print(graph.mermaid(args.focus, args.depth), end=""); return 0
         if args.command == "html": write_html(graph, args.output, args.title); _json({"written": args.output, **graph.stats()}); return 0
