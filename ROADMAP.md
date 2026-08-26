@@ -1,45 +1,40 @@
 # Roadmap
 
 ## v0.1–v0.9 — Foundation — implemented
+Canonical graph/model/schema, validation, quality, impact, ingestion/adapters, policy packs, semantic diff/review, SVG explorer, bounded agent context and MCP.
 
-Canonical graph/model/schema, validation, quality, impact, CSV/Excel ingestion, Mapping/Interface/Process-as-Code adapters, policy packs, semantic diff/review, HTML/SVG explorer, bounded agent context, and MCP v2.
-
-## v0.10 — Traceability and role views — implemented
-- [x] JSON/Markdown/CSV traceability matrix
-- [x] architect, integration, data, test, and cutover views
-- [x] MCP traceability tools
-
-## v0.11 — Adapter conformance — implemented
-- [x] semantic conformance for all three as-code adapters
-- [x] fail thresholds
+## v0.10–v0.11 — Traceability and adapter semantics — implemented
+- [x] JSON/Markdown/CSV traceability matrix and role views
+- [x] semantic adapter conformance
 - [x] reconciled compatible same-ID composition
 
-## v0.12 — Static publishing — implemented
-- [x] portable site bundle, role reports, canonical machine artifacts, `llms.txt`, sitemap
-- [x] GitHub Pages deployment workflow
-- [ ] enable GitHub Actions as Pages source and run first deployment
+## v0.12–v0.13 — Publishing and release readiness — implemented
+- [x] portable static site and Pages workflow
+- [x] wheel/sdist build verification and tag-driven GitHub Release
+- [ ] enable GitHub Actions as Pages source and perform first deployment
+- [ ] create first intentional public release tag
 
-## v0.13 — Release readiness — implemented
-- [x] wheel/sdist build verification
-- [x] tag-driven GitHub Release and checksums
-- [ ] create first intentional public tag/release
+## v0.14–v0.15 — Governed project build — implemented
+- [x] transparent weighted governance scorecard
+- [x] declarative project manifest
+- [x] normalize → conformance → composition → policy → scorecard → site pipeline
 
-## v0.14 — Governance scorecard — implemented
-- [x] transparent weighted dimensions
-- [x] explicit numerators, denominators, paths, and gaps
-- [x] CLI threshold, MCP tool, site scorecard
+## v0.16–v0.17 — Interoperability and focused governance — implemented
+- [x] GraphML export
+- [x] packaged adapter-contract/v0.1
+- [x] ownership/test/change-readiness views in CLI, MCP and site
 
-## v0.15 — Declarative project build — implemented
-- [x] versioned project manifest
-- [x] relative source/policy resolution
-- [x] one-command normalization, conformance, composition, governance, site generation
-- [x] build provenance/report artifacts
-- [x] Pages self-dogfoods the project manifest
+## v0.18 — Cross-repository contract kit — implemented
+- [x] immutable versioned conformance fixtures
+- [x] machine-readable fixture catalog
+- [x] conformance report JSON Schema
+- [x] reusable GitHub Action
+- [x] Action self-test in CI
 
 ## Next high-value work
-- [ ] cross-repository versioned adapter contract fixtures
-- [ ] dedicated ownership/test/change views in generated site
-- [ ] GraphML export and optional graph-database adapters
-- [ ] PR comment/check annotations in addition to Actions Summary
+- [ ] install the reusable conformance Action in Mapping/Interface/Process-as-Code sibling repositories
+- [ ] larger multi-domain reference project using additional sibling as-code artifacts
+- [ ] PR check annotations in addition to Actions Summary
+- [ ] optional graph-database adapters
 - [ ] MCP authentication/deployment profile
-- [ ] larger multi-domain enterprise reference project
+- [ ] first Pages deployment and public release tag

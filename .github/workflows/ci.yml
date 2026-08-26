@@ -37,6 +37,15 @@ jobs:
           transformation-graph adapter-contract --format json > /tmp/adapter-contract.json
           test -s /tmp/graph.graphml
           grep -q 'transformation-graph-adapter' /tmp/adapter-contract.json
+      - name: Self-test reusable adapter action
+        uses: ./
+        with:
+          kind: mapping
+          input: conformance/adapter-v0.1/mapping.pass.yaml
+          fail-on: error
+          report-path: /tmp/action-conformance.json
+      - name: Verify reusable action output
+        run: grep -q '"passed": true' /tmp/action-conformance.json
       - name: Smoke test declarative project build
         run: |
           status=0

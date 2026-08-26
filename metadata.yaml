@@ -2,13 +2,14 @@ name: Transformation Graph
 repository: transformation-graph
 owner: dkharlanau
 visibility: public
-status: alpha-v0.15
+status: alpha-v0.18
 implementation:
   implementation_status: executable-alpha
   model_version: "0.1"
   project_manifest_version: "0.1"
-  feature_version: "0.15"
-  package_version: "0.15.0"
+  adapter_contract_version: "0.1"
+  feature_version: "0.18"
+  package_version: "0.18.0"
   sap_access_required: false
   ci: true
   tests: true
@@ -17,25 +18,20 @@ implementation:
 capabilities:
   - canonical-enterprise-graph
   - semantic-validation
-  - dependency-and-impact-analysis
-  - governance-scorecard
+  - dependency-impact-traceability
+  - governance-scorecard-and-views
   - policy-packs
-  - traceability-matrix
-  - role-oriented-views
   - csv-excel-import
   - mapping-interface-process-adapters
-  - adapter-conformance
+  - versioned-adapter-contract
+  - reusable-conformance-action
   - reconciled-composition
   - semantic-diff-and-pr-review
-  - html-svg-explorer
-  - portable-static-site
-  - llms-index
-  - declarative-project-manifest
-  - governed-project-build
-  - agent-context-pack
-  - mcp-v2-server
-  - pages-workflow
-  - release-build
+  - html-svg-site
+  - graphml-export
+  - declarative-governed-project-build
+  - agent-context-and-mcp
+  - pages-and-release-workflows
 principles:
   - deterministic-first
   - versionable

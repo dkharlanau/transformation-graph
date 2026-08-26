@@ -1,0 +1,40 @@
+version: "0.2"
+process:
+  id: customer_creation
+  name: Customer Creation
+  owner: data_governance_lead
+  start: request
+roles:
+  - {id: data_governance_lead, name: Data Governance Lead}
+systems:
+  - {id: mdg, name: SAP Master Data Governance}
+  - {id: s4, name: SAP S/4HANA}
+objects:
+  - {id: business_partner, name: Business Partner}
+interfaces:
+  - {id: customer_replication, name: Customer replication}
+controls: []
+risks: []
+evidence: []
+steps:
+  - id: request
+    name: Submit customer request
+    type: user_task
+    actor: data_governance_lead
+    system: mdg
+    objects: [business_partner]
+    transitions: [{to: replicate}]
+  - id: replicate
+    name: Replicate customer
+    type: service_task
+    system: mdg
+    interfaces: [customer_replication]
+    transitions: [{to: validate}]
+  - id: validate
+    name: Validate customer in S/4HANA
+    type: user_task
+    actor: data_governance_lead
+    system: s4
+    objects: [business_partner]
+    transitions: [{to: complete}]
+  - {id: complete, name: Customer created, type: end}

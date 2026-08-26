@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dkharlanau/transformation-graph/schema/adapter-conformance-report.schema.json",
+  "title": "Transformation Graph Adapter Conformance Report",
+  "type": "object",
+  "required": ["contract", "adapter", "project", "passed", "summary", "findings", "stats"],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": {"const": "transformation-graph-adapter"},
+        "version": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "adapter": {"enum": ["mapping", "interface", "process"]},
+    "project": {"type": ["string", "null"]},
+    "passed": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "required": ["errors", "warnings", "findings"],
+      "properties": {
+        "errors": {"type": "integer", "minimum": 0},
+        "warnings": {"type": "integer", "minimum": 0},
+        "findings": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "message"],
+        "properties": {
+          "code": {"type": "string"},
+          "severity": {"enum": ["error", "warning"]},
+          "message": {"type": "string"},
+          "node": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "stats": {"type": "object"}
+  },
+  "additionalProperties": false
+}

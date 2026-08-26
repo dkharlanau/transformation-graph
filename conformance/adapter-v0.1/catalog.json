@@ -1,0 +1,17 @@
+{
+  "contract": {
+    "id": "transformation-graph-adapter",
+    "version": "0.1",
+    "canonical_graph_version": "0.1"
+  },
+  "report_schema": "../../schema/adapter-conformance-report.schema.json",
+  "fixtures": [
+    {"kind": "mapping", "path": "mapping.pass.yaml", "expected": {"errors": 0}},
+    {"kind": "interface", "path": "interface.pass.yaml", "expected": {"errors": 0}},
+    {"kind": "process", "path": "process.pass.yaml", "expected": {"errors": 0}}
+  ],
+  "consumer_pattern": {
+    "github_action": "dkharlanau/transformation-graph",
+    "inputs": ["kind", "input", "fail-on", "report-path"]
+  }
+}

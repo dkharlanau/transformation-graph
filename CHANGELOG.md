@@ -2,36 +2,43 @@
 
 All notable product changes are recorded here. Versions before the first public tag represent repository development milestones.
 
-## 0.15.0 — Unreleased
+## 0.18.0 — Unreleased
 
-- Added declarative project manifests with relative source resolution.
-- Added one-command normalize → conformance → reconcile → policy → scorecard → site build flow.
-- Added governed build reports and self-dogfooded the manifest in CI and Pages.
+- Added immutable adapter-contract/v0.1 conformance fixture kit and catalog.
+- Added JSON Schema for adapter conformance reports.
+- Added reusable composite GitHub Action and self-test in CI.
+
+## 0.17.0
+
+- Added focused ownership, test-coverage, and change-readiness governance views.
+- Added governance views to CLI/MCP and published site bundles.
+- Added GraphML to governed static sites.
+
+## 0.16.0
+
+- Added standards-oriented GraphML export.
+- Added packaged versioned adapter semantic contract and contract identity in conformance reports.
+
+## 0.15.0
+
+- Added declarative project manifests and one-command governed project builds.
 
 ## 0.14.0
 
-- Added transparent weighted governance scorecards with explicit numerators, denominators, paths, and gaps.
-- Added score thresholds to CI, MCP access, and scorecard artifacts in the static site.
+- Added transparent weighted governance scorecards with explicit coverage counts, paths, and gaps.
 
 ## 0.13.0
 
-- Added build verification for wheel and source distributions.
-- Added tag-driven GitHub Release workflow with SHA-256 checksums.
-- Added package discovery metadata and project URLs.
+- Added package/release build readiness and tag-driven GitHub Release workflow.
 
 ## 0.12.0
 
-- Added portable static site generation with landing page, interactive explorer, canonical JSON, catalog, manifest, `llms.txt`, role reports, sitemap, and robots metadata.
-- Added a manual GitHub Pages publishing workflow.
+- Added portable static site generation and GitHub Pages workflow.
 
-## 0.11.0
+## 0.10.0–0.11.0
 
-- Added semantic adapter conformance checks and reconciled composition.
-
-## 0.10.0
-
-- Added deterministic traceability matrix export and architect/integration/data/test/cutover role views.
+- Added role traceability, adapter semantic conformance, and reconciled composition.
 
 ## 0.1.0–0.9.0
 
-- Established the canonical graph, validation, ingestion, impact/change intelligence, visualization, governance policies, bounded agent context, and MCP adapter.
+- Established the canonical graph, validation, ingestion, impact/change intelligence, visualization, policy governance, bounded agent context, and MCP adapter.

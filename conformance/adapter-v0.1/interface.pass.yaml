@@ -1,0 +1,21 @@
+version: "1.0"
+interface:
+  id: CUSTOMER-MDG-S4-01
+  name: Customer replication from SAP MDG to S/4HANA
+  source: {system: SAP-MDG, object: BusinessPartner}
+  target: {system: SAP-S4, object: Customer}
+  mode: async
+  pattern: message-driven
+  criticality: high
+ownership:
+  business: Customer Master Data
+  technical: SAP MDG Integration
+route:
+  middleware: [SAP-Integration-Layer]
+mapping:
+  file: mapping.yaml
+  profile: customer-core
+tests:
+  - id: happy-path
+    description: Approved customer reaches S/4HANA
+    expected: processed
