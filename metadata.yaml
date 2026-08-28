@@ -3,6 +3,17 @@ repository: transformation-graph
 owner: dkharlanau
 visibility: public
 status: alpha-v0.18
+portfolio_role: derived-analysis
+semantic_ownership:
+  owns:
+    - graph-specific analysis annotations
+    - graph governance policies and scorecards
+    - materialized project graph revisions and derived views
+  consumes:
+    - mapping-as-code transformation contracts
+    - interface-as-code integration contracts
+    - process-as-code process contracts
+  boundary: Imported domain semantics remain owned by their source products; change them upstream and regenerate the materialized graph.
 implementation:
   implementation_status: executable-alpha
   model_version: "0.1"
@@ -16,7 +27,7 @@ implementation:
   package_build: true
   release_workflow: true
 capabilities:
-  - canonical-enterprise-graph
+  - canonical-materialized-project-graph
   - semantic-validation
   - dependency-impact-traceability
   - governance-scorecard-and-views
@@ -40,6 +51,7 @@ principles:
   - git-friendly
   - bounded-context
   - fail-loud-on-conflict
+  - references-before-copies
 primary_users:
   - SAP consultants
   - enterprise architects
