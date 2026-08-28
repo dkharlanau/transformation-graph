@@ -16,9 +16,22 @@ transformation-graph build-project \
   --output-dir build
 ```
 
-One build normalizes Mapping/Interface/Process-as-Code sources, checks the versioned adapter contract, reconciles compatible entities, applies policies, calculates a transparent governance scorecard, writes the canonical graph, and optionally publishes a complete static site.
+One build normalizes Mapping/Interface/Process-as-Code sources, checks the versioned adapter contract, reconciles compatible entities, applies policies, calculates a transparent governance scorecard, writes the canonical **materialized project graph for that build**, and optionally publishes a complete static site.
 
 Outputs include `graph.yaml`, `build-report.json`, `conformance.json`, `policy.json`, `scorecard.json`, and `site/`.
+
+## Ownership boundary
+
+Transformation Graph is a **derived analysis layer**, not a replacement authoring system for the contracts it imports.
+
+- Mapping as Code remains the semantic owner of source-to-target transformation intent.
+- Interface as Code remains the semantic owner of integration trigger, transport, retry/recovery, monitoring, ownership, and interface-contract semantics.
+- Process as Code remains the semantic owner of process steps, transitions, roles, and gates.
+- Transformation Graph owns graph-specific analysis annotations, graph governance policy/scorecards, materialized project revisions, and derived views that do not belong in those upstream domain contracts.
+
+“Canonical graph” therefore means canonical **inside one Transformation Graph project/revision after deterministic materialization**. It does not mean a universal enterprise master graph or a second source of truth for imported mappings, interfaces, or processes. When imported domain semantics change, change them in the owning product and rebuild the graph. Detached exports remain point-in-time materializations with provenance.
+
+This boundary is deliberate: references and reproducible projections are preferred to maintaining the same business rule independently in several repositories.
 
 ## What it answers
 
