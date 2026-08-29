@@ -8,6 +8,23 @@ Transformation Graph turns fragmented enterprise transformation artifacts into o
 
 No SAP system access is required.
 
+## Choose this graph when
+
+Use **Transformation Graph** when the durable object you need is a **materialized project model**: a normalized view across process, interface, mapping, data, ownership, tests and evidence that can be rebuilt, governed, scored, explored and queried throughout a transformation.
+
+Use [Enterprise Change Graph](https://github.com/dkharlanau/enterprise-change-graph) instead when the primary object is a **concrete change or release decision** and the question is: what does this change affect, why is something in or out of scope, what regression tests are required, and who must review it?
+
+| Question | Transformation Graph | Enterprise Change Graph |
+| --- | --- | --- |
+| What is the connected transformation model for this project/revision? | **Primary** | Supporting input |
+| Where are ownership, test, evidence or traceability gaps? | **Primary** | Change-specific gaps |
+| What does change `CR-142` affect and why? | General graph traversal | **Primary** |
+| Why is a target excluded from this change's impact? | Not the main abstraction | **Primary (`why-not`)** |
+| What minimum regression scope follows from a release? | Can expose coverage | **Primary** |
+| Should upstream Mapping/Interface/Process semantics be authored here? | **No** | **No** |
+
+Both products are derived analysis layers. Neither is a universal enterprise CMDB or a second authoring home for semantics owned by Mapping as Code, Interface as Code, or Process as Code.
+
 ## Recommended flow: one project manifest
 
 ```bash
@@ -115,6 +132,8 @@ CI verifies wheel and sdist creation. An exact matching `v*` tag triggers the re
 ## Related projects
 
 [Mapping as Code](https://github.com/dkharlanau/mapping-as-code) · [Interface as Code](https://github.com/dkharlanau/interface-as-code) · [Process as Code](https://github.com/dkharlanau/process-as-code) · [Reconciliation as Code](https://github.com/dkharlanau/reconciliation-as-code) · [Enterprise Change Graph](https://github.com/dkharlanau/enterprise-change-graph) · [Project Evidence Graph](https://github.com/dkharlanau/project-evidence-graph)
+
+Portfolio map: https://dkharlanau.github.io/products/
 
 ## Status
 
