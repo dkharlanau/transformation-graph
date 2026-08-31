@@ -4,7 +4,7 @@
   "purpose": "Compose enterprise transformation artifacts into a deterministic dependency graph for traceability, impact, governance, and bounded agent context.",
   "human_url": "https://dkharlanau.github.io/transformation-graph/",
   "repository": "https://github.com/dkharlanau/transformation-graph",
-  "boundaries": ["not a replacement for source contracts", "do not invent graph edges", "adapter conformance must pass before cross-repository composition", "use bounded traversal for agent context"],
+  "boundaries": ["not a replacement for source contracts", "do not invent graph edges", "adapter conformance must pass before cross-repository composition", "use bounded traversal for agent context", "no direct Enterprise Change Graph or Project Evidence Graph native-format handoff exists"],
   "capabilities": ["build governed project graphs", "validate canonical graph", "trace paths", "bounded impact traversal", "role and governance views", "governance scorecards", "semantic graph diff", "static explorer publishing", "GraphML export", "context packs and MCP"],
   "entrypoints": [
     {"type":"cli","command":"transformation-graph build-project <project.yaml> --output-dir build"},
