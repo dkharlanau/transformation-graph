@@ -11,7 +11,7 @@ Canonical graph/model/schema, validation, quality, impact, ingestion/adapters, p
 ## v0.12–v0.13 — Publishing and release readiness — implemented
 - [x] portable static site and Pages workflow
 - [x] wheel/sdist build verification and tag-driven GitHub Release
-- [ ] enable GitHub Actions as Pages source and perform first deployment
+- [x] enable GitHub Actions as Pages source and perform first deployment
 - [ ] create first intentional public release tag
 
 ## v0.14–v0.15 — Governed project build — implemented
@@ -37,4 +37,4 @@ Canonical graph/model/schema, validation, quality, impact, ingestion/adapters, p
 - [ ] PR check annotations in addition to Actions Summary
 - [ ] optional graph-database adapters
 - [ ] MCP authentication/deployment profile
-- [ ] first Pages deployment and public release tag
+- [ ] first public release tag
